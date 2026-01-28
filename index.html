@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Entomology Flashcards</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #1a1a2e; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+    h1 { margin-bottom: 10px; color: #4ecca3; }
+    .mode-toggle { margin-bottom: 20px; }
+    .mode-toggle button { background: #333; color: #eee; }
+    .mode-toggle button.active { background: #4ecca3; color: #1a1a2e; }
+    .card { width: 100%; max-width: 500px; min-height: 380px; perspective: 1000px; cursor: pointer; margin-bottom: 20px; }
+    .card-inner { width: 100%; height: 100%; min-height: 380px; transition: transform 0.6s; transform-style: preserve-3d; position: relative; }
+    .card.flipped .card-inner { transform: rotateY(180deg); }
+    .card-front, .card-back { position: absolute; width: 100%; min-height: 380px; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+    .card-front { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .card-back { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); transform: rotateY(180deg); color: #1a1a2e; }
+    .insect-name { font-size: 1.6em; font-weight: bold; margin-bottom: 10px; }
+    .question { font-size: 1.2em; margin: 15px 0; background: rgba(0,0,0,0.2); padding: 10px 15px; border-radius: 8px; }
+    .answer-label { font-size: 0.9em; opacity: 0.8; margin-bottom: 5px; }
+    .answer-value { font-size: 1.4em; font-weight: bold; margin-bottom: 15px; }
+    .marks { font-size: 1em; line-height: 1.5; }
+    .hint { font-size: 0.85em; opacity: 0.7; margin-top: 10px; }
+    .img-container { width: 160px; height: 120px; background: rgba(255,255,255,0.2); border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.8em; overflow: hidden; }
+    .img-container img { width: 100%; height: 100%; object-fit: cover; }
+    button { background: #4ecca3; color: #1a1a2e; border: none; padding: 12px 24px; font-size: 1em; border-radius: 8px; cursor: pointer; margin: 5px; }
+    button:hover { background: #3db892; }
+    .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .progress { margin-top: 15px; opacity: 0.7; }
+    .quiz-input { margin-bottom: 15px; display: none; flex-direction: column; align-items: center; gap: 10px; }
+    .quiz-input input { padding: 10px; font-size: 1em; border-radius: 8px; border: none; width: 250px; }
+    .quiz-input.active { display: flex; }
+    .score { color: #4ecca3; font-weight: bold; margin-top: 10px; }
+    .feedback { margin-top: 10px; font-weight: bold; }
+    .feedback.correct { color: #38ef7d; }
+    .feedback.incorrect { color: #ff6b6b; }
+    .loading { opacity: 0.6; font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <h1>🐛 Entomology Flashcards</h1>
+  <div class="mode-toggle">
+    <button class="active" onclick="setMode('flashcard')">Flashcard Mode</button>
+    <button onclick="setMode('quiz')">Quiz Mode</button>
+  </div>
+  
+  <div class="card" onclick="flashcardMode && flipCard()">
+    <div class="card-inner">
+      <div class="card-front">
+        <div class="img-container" id="front-img"><span class="loading">Loading...</span></div>
+        <div class="insect-name" id="insect-name"></div>
+        <div class="question" id="question"></div>
+        <div class="hint" id="hint">Click to reveal answer</div>
+      </div>
+      <div class="card-back">
+        <div class="img-container" id="back-img"></div>
+        <div class="answer-label" id="answer-label"></div>
+        <div class="answer-value" id="answer-value"></div>
+        <div class="marks" id="full-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quiz-input" id="quiz-input">
+    <input type="text" id="user-answer" placeholder="Type your answer..." onkeypress="if(event.key==='Enter')checkAnswer()">
+    <button onclick="checkAnswer()">Submit</button>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <div class="controls">
+    <button onclick="nextCard()">Next Card</button>
+    <button onclick="shuffleCards()">Shuffle</button>
+  </div>
+  <div class="progress" id="progress"></div>
+  <div class="score" id="score"></div>
+
+  <script>
+    const insects = [
+      { name: "Ladybug", wiki: "Coccinellidae", order: "Coleoptera", family: "Coccinellidae", marks: "Round dome shape, red/orange with black spots, beneficial predator" },
+      { name: "Stag Beetle", wiki: "Stag_beetle", order: "Coleoptera", family: "Lucanidae", marks: "Large mandibles in males, hardened elytra, larvae in rotting wood" },
+      { name: "Monarch Butterfly", wiki: "Monarch_butterfly", order: "Lepidoptera", family: "Nymphalidae", marks: "Orange with black veins, white spots on edges, migratory" },
+      { name: "Luna Moth", wiki: "Luna_moth", order: "Lepidoptera", family: "Saturniidae", marks: "Pale green, long tails on hindwings, no functional mouthparts" },
+      { name: "Honey Bee", wiki: "Honey_bee", order: "Hymenoptera", family: "Apidae", marks: "Golden-brown with stripes, pollen baskets on legs, social" },
+      { name: "Paper Wasp", wiki: "Paper_wasp", order: "Hymenoptera", family: "Vespidae", marks: "Narrow waist, long legs, builds paper nests" },
+      { name: "House Fly", wiki: "Housefly", order: "Diptera", family: "Muscidae", marks: "Single pair wings, large red eyes, sponging mouthparts" },
+      { name: "Mosquito", wiki: "Mosquito", order: "Diptera", family: "Culicidae", marks: "Long proboscis, scaled wings, aquatic larvae" },
+      { name: "Grasshopper", wiki: "Grasshopper", order: "Orthoptera", family: "Acrididae", marks: "Enlarged hind legs, short antennae, herbivorous" },
+      { name: "Field Cricket", wiki: "Gryllus_pennsylvanicus", order: "Orthoptera", family: "Gryllidae", marks: "Long antennae, chirping song, omnivorous" },
+      { name: "Stink Bug", wiki: "Pentatomidae", order: "Hemiptera", family: "Pentatomidae", marks: "Shield-shaped, scent glands, piercing mouthparts" },
+      { name: "Cicada", wiki: "Cicada", order: "Hemiptera", family: "Cicadidae", marks: "Large eyes, transparent wings, loud buzzing call" },
+      { name: "Green Darner", wiki: "Common_green_darner", order: "Odonata", family: "Aeshnidae", marks: "Green thorax, blue abdomen, large compound eyes, strong flier" },
+      { name: "Ebony Jewelwing", wiki: "Ebony_jewelwing", order: "Odonata", family: "Calopterygidae", marks: "Metallic green body, black wings, damselfly" },
+      { name: "American Cockroach", wiki: "American_cockroach", order: "Blattodea", family: "Blattidae", marks: "Reddish-brown, flattened, long antennae, fast runner" },
+      { name: "Praying Mantis", wiki: "Mantis_religiosa", order: "Mantodea", family: "Mantidae", marks: "Triangular head, raptorial forelegs, ambush predator" },
+      { name: "Green Lacewing", wiki: "Chrysoperla_carnea", order: "Neuroptera", family: "Chrysopidae", marks: "Delicate green, golden eyes, net-veined wings, larvae eat aphids" },
+      { name: "Antlion", wiki: "Antlion", order: "Neuroptera", family: "Myrmeleontidae", marks: "Larvae dig pit traps, adults resemble damselflies" },
+      { name: "Mayfly", wiki: "Mayfly", order: "Ephemeroptera", family: "Ephemeridae", marks: "Two/three long tails, upright wings at rest, very short adult life" },
+      { name: "Stonefly", wiki: "Plecoptera", order: "Plecoptera", family: "Perlidae", marks: "Two tail filaments, wings fold flat, indicator of clean water" },
+      { name: "Caddisfly", wiki: "Caddisfly", order: "Trichoptera", family: "Limnephilidae", marks: "Hairy wings, moth-like, larvae build portable cases" },
+      { name: "Cat Flea", wiki: "Cat_flea", order: "Siphonaptera", family: "Pulicidae", marks: "Laterally flattened, wingless, powerful jumper, parasitic" },
+      { name: "Earwig", wiki: "Earwig", order: "Dermaptera", family: "Forficulidae", marks: "Forceps-like cerci at rear, nocturnal, omnivorous" },
+      { name: "Walking Stick", wiki: "Phasmatodea", order: "Phasmatodea", family: "Diapheromeridae", marks: "Twig-like camouflage, slow moving, herbivorous" },
+      { name: "Scorpionfly", wiki: "Scorpionfly", order: "Mecoptera", family: "Panorpidae", marks: "Elongated beak-like face, males have curved tail tip" },
+      { name: "Dobsonfly", wiki: "Dobsonfly", order: "Megaloptera", family: "Corydalidae", marks: "Large mandibles in males, aquatic larvae (hellgrammites)" },
+      { name: "Thrips", wiki: "Thrips", order: "Thysanoptera", family: "Thripidae", marks: "Tiny, fringed wings, rasping mouthparts, plant pest" },
+    ];
+
+    const imageCache = {};
+    const questionTypes = [
+      { q: "What ORDER does this insect belong to?", field: "order" },
+      { q: "What FAMILY does this insect belong to?", field: "family" },
+      { q: "What are the distinguishing MARKS of this insect?", field: "marks" },
+    ];
+
+    let deck = [], currentIndex = 0, flashcardMode = true, score = 0, attempts = 0, currentQuestion = null;
+
+    function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
+    function flipCard() { document.querySelector('.card').classList.toggle('flipped'); }
+
+    async function fetchImage(wikiTitle) {
+      if (imageCache[wikiTitle]) return imageCache[wikiTitle];
+      try {
+        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        const imgUrl = data.thumbnail?.source || '';
+        imageCache[wikiTitle] = imgUrl;
+        return imgUrl;
+      } catch { return ''; }
+    }
+
+    function buildDeck() {
+      deck = [];
+      insects.forEach(insect => {
+        questionTypes.forEach(qt => {
+          deck.push({ insect, questionType: qt });
+        });
+      });
+      shuffle(deck);
+    }
+
+    async function showCard() {
+      const item = deck[currentIndex];
+      const insect = item.insect;
+      currentQuestion = item.questionType;
+
+      document.getElementById('front-img').innerHTML = '<span class="loading">Loading...</span>';
+      document.getElementById('back-img').innerHTML = '';
+      document.getElementById('insect-name').textContent = insect.name;
+      document.getElementById('question').textContent = currentQuestion.q;
+      document.getElementById('answer-label').textContent = currentQuestion.field.toUpperCase();
+      document.getElementById('answer-value').textContent = insect[currentQuestion.field];
+      document.getElementById('full-info').innerHTML = `<strong>Order:</strong> ${insect.order}<br><strong>Family:</strong> ${insect.family}<br><strong>Marks:</strong> ${insect.marks}`;
+      document.getElementById('progress').textContent = `Card ${currentIndex + 1} of ${deck.length}`;
+      document.getElementById('feedback').textContent = '';
+      document.getElementById('user-answer').value = '';
+      document.querySelector('.card').classList.remove('flipped');
+
+      const imgUrl = await fetchImage(insect.wiki);
+      const imgHtml = imgUrl ? `<img src="${imgUrl}" alt="${insect.name}">` : 'No image';
+      document.getElementById('front-img').innerHTML = imgHtml;
+      document.getElementById('back-img').innerHTML = imgHtml;
+    }
+
+    function nextCard() { currentIndex = (currentIndex + 1) % deck.length; showCard(); }
+    function shuffleCards() { buildDeck(); currentIndex = 0; score = 0; attempts = 0; updateScore(); showCard(); }
+
+    function setMode(mode) {
+      flashcardMode = mode === 'flashcard';
+      document.querySelectorAll('.mode-toggle button').forEach((b, i) => b.classList.toggle('active', i === (flashcardMode ? 0 : 1)));
+      document.getElementById('quiz-input').classList.toggle('active', !flashcardMode);
+      document.getElementById('hint').textContent = flashcardMode ? 'Click to reveal answer' : 'Type your answer below';
+      score = 0; attempts = 0; updateScore(); showCard();
+    }
+
+    function checkAnswer() {
+      const userAnswer = document.getElementById('user-answer').value.trim().toLowerCase();
+      const correct = deck[currentIndex].insect[currentQuestion.field].toLowerCase();
+      const feedback = document.getElementById('feedback');
+      attempts++;
+      if (correct.includes(userAnswer) && userAnswer.length > 2) {
+        score++;
+        feedback.textContent = '✓ Correct!';
+        feedback.className = 'feedback correct';
+      } else {
+        feedback.textContent = `✗ Answer: ${deck[currentIndex].insect[currentQuestion.field]}`;
+        feedback.className = 'feedback incorrect';
+      }
+      updateScore();
+      flipCard();
+    }
+
+    function updateScore() {
+      document.getElementById('score').textContent = attempts ? `Score: ${score}/${attempts} (${Math.round(score/attempts*100)}%)` : '';
+    }
+
+    buildDeck();
+    showCard();
+  </script>
+</body>
+</html>
