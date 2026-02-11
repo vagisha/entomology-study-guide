@@ -36,10 +36,29 @@
     .container { max-width: 1200px; margin: 0 auto; }
     
     .order-list {
+      margin-bottom: 30px;
+    }
+    
+    .metamorphosis-section {
+      margin-bottom: 40px;
+    }
+    
+    .metamorphosis-section h2 {
+      color: #4ecca3;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+    
+    .metamorphosis-section .description {
+      color: #aaa;
+      margin-bottom: 15px;
+      font-size: 0.9em;
+    }
+    
+    .order-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 15px;
-      margin-bottom: 30px;
     }
     
     .order-card {
@@ -147,6 +166,39 @@
     
     .order-title.active { display: flex; align-items: center; gap: 15px; }
     
+    .order-info-box {
+      background: #2a2a3e;
+      border: 2px solid #4ecca3;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    .order-info-box.active { display: block; }
+    
+    .order-info-box h3 {
+      color: #4ecca3;
+      margin-bottom: 10px;
+      font-size: 1.2em;
+    }
+    
+    .order-info-box .info-row {
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+    
+    .order-info-box .info-label {
+      color: #4ecca3;
+      font-weight: bold;
+      display: inline-block;
+      min-width: 120px;
+    }
+    
+    .order-info-box .info-value {
+      color: #eee;
+    }
+    
     .order-links {
       display: flex;
       gap: 10px;
@@ -176,12 +228,111 @@
   <div class="container">
     <button class="back-btn" id="back-btn" onclick="showOrders()">← Back to Orders</button>
     <h2 class="order-title" id="order-title"></h2>
+    <div class="order-info-box" id="order-info-box"></div>
     
     <div class="order-list" id="order-list"></div>
     <div class="family-grid" id="family-grid"></div>
   </div>
 
   <script>
+    // Order descriptions and characteristics
+    const orderInfo = {
+      "Blattodea": {
+        meaning: "Avoiding light",
+        characteristics: "Head under thorax",
+        wings: "2 pairs, leathery",
+        children: "Nymphs – like adults but no wings"
+      },
+      "Coleoptera": {
+        meaning: "Hard wings",
+        characteristics: "Hard shell",
+        wings: "2 pairs, front wings hardened",
+        children: "Larvae – variable: grub-like or worm-like"
+      },
+      "Dermaptera": {
+        meaning: "Leathery wings",
+        characteristics: "Pincer tails",
+        wings: "2 pairs, short, tough",
+        children: "Nymphs – like adults but no wings"
+      },
+      "Diptera": {
+        meaning: "Two wings",
+        characteristics: "Only one pair of wings",
+        wings: "1 pair only",
+        children: "Larvae – maggots"
+      },
+      "Hemiptera": {
+        meaning: "Half wings",
+        characteristics: "Sucking mouthparts",
+        wings: "Variable - 2 pairs, X shaped or colored line OR wings colored or clear held straight over back OR wingless (ex. Scale insect)",
+        children: "Nymphs – like adults but wingless"
+      },
+      "Hymenoptera": {
+        meaning: "Membrane wings",
+        characteristics: "Wasp waist & stingers",
+        wings: "2 pairs, except most ants (no wings)",
+        children: "Larvae – maggot or grub-like"
+      },
+      "Lepidoptera": {
+        meaning: "Scaly wings",
+        characteristics: "Colored scales on wings",
+        wings: "2 pairs with colored scales",
+        children: "Larvae – caterpillars"
+      },
+      "Orthoptera": {
+        meaning: "Straight wings",
+        characteristics: "Jumping hind legs",
+        wings: "2 pairs, folded over back",
+        children: "Nymphs – like adults but no wings"
+      },
+      "Mantodea": {
+        meaning: "Like a prophet",
+        characteristics: "Grabbing front legs",
+        wings: "2 pairs, doubled over on back",
+        children: "Nymphs – like adults but no wings"
+      },
+      "Neuroptera": {
+        meaning: "Nerve wings",
+        characteristics: "Net like wings",
+        wings: "2 pairs w/ lots of veins, tent-like",
+        children: "Larvae – long & flat, w/ BIG mandibles"
+      },
+      "Odonata": {
+        meaning: "Toothed flies",
+        characteristics: "Enormous eyes",
+        wings: "2 pairs: do not fold over back",
+        children: "Nymphs – aquatic"
+      },
+      "Phasmatodea": {
+        meaning: "Like a ghost",
+        characteristics: "Stick-like body",
+        wings: "2 pairs (males), females wingless",
+        children: "Nymphs – like adults but wingless"
+      }
+    };
+    
+    // Metamorphosis type for each order
+    const metamorphosisTypes = {
+      ametabolous: {
+        title: "Ametabolous (No Metamorphosis)",
+        description: "Develop directly from egg to adult with no significant body changes",
+        orders: ["Protura", "Diplura", "Archaeognatha", "Zygentoma"]
+      },
+      hemimetabolous: {
+        title: "Hemimetabolous (Incomplete Metamorphosis)",
+        description: "Develop through nymph stages that resemble adults (egg → nymph → adult)",
+        orders: ["Ephemeroptera", "Odonata", "Blattodea", "Mantodea", "Embioptera", 
+                 "Dermaptera", "Plecoptera", "Orthoptera", "Phasmatodea", "Psocodea", 
+                 "Hemiptera", "Thysanoptera"]
+      },
+      holometabolous: {
+        title: "Holometabolous (Complete Metamorphosis)",
+        description: "Develop through distinct larval and pupal stages (egg → larva → pupa → adult)",
+        orders: ["Megaloptera", "Neuroptera", "Coleoptera", "Mecoptera", "Raphidioptera", 
+                 "Siphonaptera", "Diptera", "Trichoptera", "Lepidoptera", "Hymenoptera"]
+      }
+    };
+    
     // BugGuide links - edit this object to add more links
     const bugguideLinks = {
       orders: {
@@ -388,24 +539,44 @@
     });
 
     function showOrders() {
-      document.getElementById('order-list').style.display = 'grid';
+      document.getElementById('order-list').style.display = 'block';
       document.getElementById('family-grid').classList.remove('active');
       document.getElementById('back-btn').classList.remove('active');
       document.getElementById('order-title').classList.remove('active');
+      document.getElementById('order-info-box').classList.remove('active');
       
       const orderList = document.getElementById('order-list');
       orderList.innerHTML = '';
       
-      Object.keys(orderGroups).sort().forEach(order => {
-        const count = orderGroups[order].length;
-        const card = document.createElement('div');
-        card.className = 'order-card';
-        card.innerHTML = `
-          <h3>${order}</h3>
-          <div class="count">${count} ${count === 1 ? 'family' : 'families'}</div>
+      // Create sections for each metamorphosis type
+      ['ametabolous', 'hemimetabolous', 'holometabolous'].forEach(type => {
+        const section = document.createElement('div');
+        section.className = 'metamorphosis-section';
+        
+        const typeInfo = metamorphosisTypes[type];
+        section.innerHTML = `
+          <h2>${typeInfo.title}</h2>
+          <div class="description">${typeInfo.description}</div>
+          <div class="order-grid" id="${type}-grid"></div>
         `;
-        card.onclick = () => showFamilies(order);
-        orderList.appendChild(card);
+        orderList.appendChild(section);
+        
+        const grid = section.querySelector('.order-grid');
+        
+        // Add order cards for this metamorphosis type
+        typeInfo.orders.forEach(order => {
+          if (orderGroups[order]) {
+            const count = orderGroups[order].length;
+            const card = document.createElement('div');
+            card.className = 'order-card';
+            card.innerHTML = `
+              <h3>${order}</h3>
+              <div class="count">${count} ${count === 1 ? 'family' : 'families'}</div>
+            `;
+            card.onclick = () => showFamilies(order);
+            grid.appendChild(card);
+          }
+        });
       });
     }
 
@@ -414,6 +585,7 @@
       document.getElementById('family-grid').classList.add('active');
       document.getElementById('back-btn').classList.add('active');
       document.getElementById('order-title').classList.add('active');
+      document.getElementById('order-info-box').classList.add('active');
       
       // Build order title with links
       const orderLink = bugguideLinks.orders?.[order];
@@ -428,6 +600,34 @@
           ${bugguideButton}
         </div>
       `;
+      
+      // Display order information if available
+      const infoBox = document.getElementById('order-info-box');
+      const info = orderInfo[order];
+      if (info) {
+        infoBox.innerHTML = `
+          <h3>Order Characteristics</h3>
+          <div class="info-row">
+            <span class="info-label">Meaning:</span>
+            <span class="info-value">'${info.meaning}'</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Characteristics:</span>
+            <span class="info-value">${info.characteristics}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Wings:</span>
+            <span class="info-value">${info.wings}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Children:</span>
+            <span class="info-value">${info.children}</span>
+          </div>
+        `;
+      } else {
+        infoBox.innerHTML = '';
+        infoBox.classList.remove('active');
+      }
       
       const familyGrid = document.getElementById('family-grid');
       familyGrid.innerHTML = '';
