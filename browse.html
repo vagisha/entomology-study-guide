@@ -8,7 +8,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
       font-family: system-ui, sans-serif; 
-      background: #1a1a2e; 
+      background: #2c3e50; 
       color: #eee; 
       min-height: 100vh; 
       padding: 20px; 
@@ -17,7 +17,7 @@
       text-align: center;
       margin-bottom: 30px;
     }
-    h1 { color: #4ecca3; margin-bottom: 10px; }
+    h1 { color: #74c69d; margin-bottom: 10px; }
     .nav-links {
       display: flex;
       gap: 15px;
@@ -25,13 +25,13 @@
       margin-bottom: 20px;
     }
     .nav-links a {
-      background: #333;
-      color: #4ecca3;
+      background: #34495e;
+      color: #74c69d;
       padding: 10px 20px;
       text-decoration: none;
       border-radius: 8px;
     }
-    .nav-links a:hover { background: #444; }
+    .nav-links a:hover { background: #5d6d7e; }
     
     .container { max-width: 1200px; margin: 0 auto; }
     
@@ -44,7 +44,7 @@
     }
     
     .metamorphosis-section h2 {
-      color: #4ecca3;
+      color: #74c69d;
       margin-bottom: 15px;
       font-size: 1.5em;
     }
@@ -62,7 +62,7 @@
     }
     
     .order-card {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, #34495e 0%, #5d6d7e 100%);
       padding: 20px;
       border-radius: 12px;
       cursor: pointer;
@@ -83,15 +83,15 @@
     .family-grid.active { display: grid; }
     
     .family-card {
-      background: #2a2a3e;
+      background: linear-gradient(135deg, #4a5f5a 0%, #5d7570 100%);
       border-radius: 12px;
       padding: 15px;
-      border: 2px solid #444;
+      border: 2px solid #40916c;
     }
     
     .family-card.optional {
-      border: 2px dashed #ffa500;
-      background: #2a2535;
+      border: 4px dashed #ffa500;
+      background: linear-gradient(135deg, #3d4f4a 0%, #4a5f5a 100%);
     }
     
     .family-card.optional h4::after {
@@ -101,20 +101,21 @@
     }
     
     .family-card h4 {
-      color: #4ecca3;
+      color: #f0f0f0;
       margin-bottom: 5px;
     }
     
     .family-card .common-name {
-      color: #aaa;
-      font-size: 0.9em;
+      color: #e0e0e0;
+      font-size: 1em;
+      font-weight: bold;
       margin-bottom: 10px;
     }
     
     .image-container {
       width: 100%;
       height: 200px;
-      background: rgba(255,255,255,0.1);
+      background: rgba(0,0,0,0.3);
       border-radius: 8px;
       margin-bottom: 10px;
       display: flex;
@@ -143,8 +144,8 @@
     
     .links a {
       flex: 1;
-      background: #4ecca3;
-      color: #1a1a2e;
+      background: #74c69d;
+      color: #2c3e50;
       padding: 8px;
       text-align: center;
       text-decoration: none;
@@ -152,11 +153,11 @@
       font-size: 0.85em;
     }
     
-    .links a:hover { background: #3db892; }
+    .links a:hover { background: #52b788; }
     
     .back-btn {
-      background: #333;
-      color: #4ecca3;
+      background: #34495e;
+      color: #74c69d;
       border: none;
       padding: 12px 24px;
       border-radius: 8px;
@@ -166,11 +167,11 @@
     }
     
     .back-btn.active { display: inline-block; }
-    .back-btn:hover { background: #444; }
+    .back-btn:hover { background: #5d6d7e; }
     
     .order-title {
       display: none;
-      color: #4ecca3;
+      color: #74c69d;
       margin-bottom: 20px;
       font-size: 2em;
     }
@@ -178,8 +179,8 @@
     .order-title.active { display: flex; align-items: center; gap: 15px; }
     
     .order-info-box {
-      background: #2a2a3e;
-      border: 2px solid #4ecca3;
+      background: #3d4952;
+      border: 2px solid #74c69d;
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
@@ -189,7 +190,7 @@
     .order-info-box.active { display: block; }
     
     .order-info-box h3 {
-      color: #4ecca3;
+      color: #74c69d;
       margin-bottom: 10px;
       font-size: 1.2em;
     }
@@ -200,7 +201,7 @@
     }
     
     .order-info-box .info-label {
-      color: #4ecca3;
+      color: #74c69d;
       font-weight: bold;
       display: inline-block;
       min-width: 120px;
@@ -211,15 +212,15 @@
     }
     
     .notes-section {
-      background: #2a2a3e;
-      border: 2px solid #667eea;
+      background: #3d4952;
+      border: 2px solid #74c69d;
       border-radius: 12px;
       padding: 15px;
       margin-top: 15px;
     }
     
     .notes-section h4 {
-      color: #667eea;
+      color: #74c69d;
       margin-bottom: 10px;
       font-size: 1em;
     }
@@ -227,9 +228,9 @@
     .notes-section textarea {
       width: 100%;
       min-height: 80px;
-      background: #1a1a2e;
+      background: #2c3e50;
       color: #eee;
-      border: 1px solid #444;
+      border: 1px solid #5d6d7e;
       border-radius: 6px;
       padding: 10px;
       font-family: inherit;
@@ -239,12 +240,12 @@
     
     .notes-section textarea:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: #74c69d;
     }
     
     .notes-section button {
-      background: #667eea;
-      color: white;
+      background: #74c69d;
+      color: #2c3e50;
       border: none;
       padding: 8px 16px;
       border-radius: 6px;
@@ -254,11 +255,11 @@
     }
     
     .notes-section button:hover {
-      background: #5568d3;
+      background: #52b788;
     }
     
     .notes-display {
-      background: #1a1a2e;
+      background: #2c3e50;
       padding: 10px;
       border-radius: 6px;
       margin-top: 8px;
@@ -272,8 +273,8 @@
     }
     
     .add-note-btn {
-      background: #667eea;
-      color: white;
+      background: #74c69d;
+      color: #2c3e50;
       border: none;
       padding: 6px 12px;
       border-radius: 6px;
@@ -283,7 +284,7 @@
     }
     
     .add-note-btn:hover {
-      background: #5568d3;
+      background: #52b788;
     }
     
     .order-links {
@@ -293,14 +294,14 @@
     }
     
     .order-links a {
-      background: #4ecca3;
-      color: #1a1a2e;
+      background: #74c69d;
+      color: #2c3e50;
       padding: 8px 16px;
       text-decoration: none;
       border-radius: 6px;
     }
     
-    .order-links a:hover { background: #3db892; }
+    .order-links a:hover { background: #52b788; }
   </style>
 </head>
 <body>
