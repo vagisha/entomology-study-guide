@@ -311,12 +311,8 @@
     ];
 
     const imageCache = {};
-    const questionTypes = [
-      { q: "What ORDER does this insect belong to?", field: "order" },
-      { q: "What FAMILY does this insect belong to?", field: "family" }
-    ];
 
-    let deck = [], currentIndex = 0, currentQuestion = null;
+    let deck = [], currentIndex = 0;
 
     function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
     function flipCard() { document.querySelector('.card').classList.toggle('flipped'); }
@@ -363,9 +359,7 @@
         // Skip optional insects if checkbox is unchecked
         if (insect.optional && !includeOptional) return;
         
-        questionTypes.forEach(qt => {
-          deck.push({ insect, questionType: qt });
-        });
+        deck.push({ insect });
       });
       shuffle(deck);
     }
@@ -373,16 +367,12 @@
     function toggleOptional() {
       buildDeck();
       currentIndex = 0;
-      score = 0;
-      attempts = 0;
-      updateScore();
       showCard();
     }
 
     async function showCard() {
       const item = deck[currentIndex];
       const insect = item.insect;
-      currentQuestion = item.questionType;
 
       document.getElementById('front-img').innerHTML = '<span class="loading">Loading...</span>';
       document.getElementById('back-img').innerHTML = '';
