@@ -298,6 +298,7 @@
     <div class="nav-links">
       <a href="index.html">Flashcards</a>
       <a href="browse.html">Browse Insects</a>
+      <a href="#" onclick="exportNotes(); return false;">💾 Export Notes</a>
     </div>
   </div>
 
@@ -837,6 +838,51 @@
           }
         }
       }
+    }
+    
+    // Export all notes to JSON file
+    function exportNotes() {
+      const notes = {
+        exportDate: new Date().toISOString(),
+        orderNotes: {},
+        familyNotes: {}
+      };
+      
+      // Collect all order notes
+      Object.keys(orderGroups).forEach(order => {
+        const note = NotesManager.getOrderNote(order);
+        if (note) {
+          notes.orderNotes[order] = note;
+        }
+      });
+      
+      // Collect all family notes
+      insectData.forEach(insect => {
+        const note = NotesManager.getFamilyNote(insect.family);
+        if (note) {
+          notes.familyNotes[insect.family] = note;
+        }
+      });
+      
+      // Check if there are any notes to export
+      if (Object.keys(notes.orderNotes).length === 0 && Object.keys(notes.familyNotes).length === 0) {
+        alert('No notes to export. Add some notes first!');
+        return;
+      }
+      
+      // Create download
+      const dataStr = JSON.stringify(notes, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `entomology-notes-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      alert(`Exported ${Object.keys(notes.orderNotes).length} order notes and ${Object.keys(notes.familyNotes).length} family notes!`);
     }
 
     // Initialize
