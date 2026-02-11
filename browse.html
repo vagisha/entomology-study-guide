@@ -89,6 +89,17 @@
       border: 2px solid #444;
     }
     
+    .family-card.optional {
+      border: 2px dashed #ffa500;
+      background: #2a2535;
+    }
+    
+    .family-card.optional h4::after {
+      content: " ⭐";
+      color: #ffa500;
+      font-size: 0.8em;
+    }
+    
     .family-card h4 {
       color: #4ecca3;
       margin-bottom: 5px;
@@ -448,7 +459,7 @@
     
     const insectData = [
       // Protura
-      { name: "Proturan", order: "Protura", family: "Protura", wiki: "Protura", bugguide: "1" },
+      { name: "Proturan", order: "Protura", family: "Protura", wiki: "Protura", bugguide: "1", optional: true },
       
       // Diplura
       { name: "Dipluran", order: "Diplura", family: "Diplura", wiki: "Diplura", bugguide: "1" },
@@ -464,7 +475,7 @@
       
       // Odonata
       { name: "Darner", order: "Odonata", family: "Aeshnidae", wiki: "Aeshnidae", bugguide: "1" },
-      { name: "Clubtail", order: "Odonata", family: "Gomphidae", wiki: "Gomphidae", bugguide: "1" },
+      { name: "Clubtail", order: "Odonata", family: "Gomphidae", wiki: "Gomphidae", bugguide: "1", optional: true },
       { name: "Skimmer", order: "Odonata", family: "Libellulidae", wiki: "Libellulidae", bugguide: "1" },
       { name: "Spread-wing Damselfly", order: "Odonata", family: "Lestidae", wiki: "Lestidae", bugguide: "1" },
       { name: "Narrow-winged Damselfly", order: "Odonata", family: "Coenagrionidae", wiki: "Coenagrionidae", bugguide: "1" },
@@ -472,7 +483,7 @@
       // Blattodea
       { name: "Termite", order: "Blattodea", family: "Termitidae", wiki: "Termitidae", bugguide: "1" },
       { name: "Household Roach", order: "Blattodea", family: "Blattidae", wiki: "Blattidae", bugguide: "1" },
-      { name: "Brown-hooded Roach", order: "Blattodea", family: "Cryptocercidae", wiki: "Cryptocercidae", bugguide: "1" },
+      { name: "Brown-hooded Roach", order: "Blattodea", family: "Cryptocercidae", wiki: "Cryptocercidae", bugguide: "1", optional: true },
       
       // Mantodea
       { name: "Mantis", order: "Mantodea", family: "Mantidae", wiki: "Mantidae", bugguide: "1" },
@@ -487,7 +498,7 @@
       { name: "Stonefly", order: "Plecoptera", family: "Perlidae", wiki: "Perlidae", bugguide: "1" },
       
       // Orthoptera
-      { name: "Pygmy Grasshopper", order: "Orthoptera", family: "Tetrigidae", wiki: "Tetrigidae", bugguide: "1" },
+      { name: "Pygmy Grasshopper", order: "Orthoptera", family: "Tetrigidae", wiki: "Tetrigidae", bugguide: "1", optional: true },
       { name: "Grasshopper", order: "Orthoptera", family: "Acrididae", wiki: "Acrididae", bugguide: "1" },
       { name: "Katydid", order: "Orthoptera", family: "Tettigoniidae", wiki: "Tettigoniidae", bugguide: "1" },
       { name: "Camel Cricket", order: "Orthoptera", family: "Rhaphidophoridae", wiki: "Rhaphidophoridae", bugguide: "1" },
@@ -501,14 +512,14 @@
       { name: "Book/Bark Lice", order: "Psocodea", family: "Psocodea", wiki: "Psocodea", bugguide: "1" },
       
       // Hemiptera
-      { name: "Toad Bug", order: "Hemiptera", family: "Gelastocoridae", wiki: "Gelastocoridae", bugguide: "1" },
+      { name: "Toad Bug", order: "Hemiptera", family: "Gelastocoridae", wiki: "Gelastocoridae", bugguide: "1", optional: true },
       { name: "Water Strider", order: "Hemiptera", family: "Gerridae", wiki: "Gerridae", bugguide: "1" },
       { name: "Bed Bug", order: "Hemiptera", family: "Cimicidae", wiki: "Cimicidae", bugguide: "1" },
-      { name: "Plant Bug", order: "Hemiptera", family: "Miridae", wiki: "Miridae", bugguide: "1" },
+      { name: "Plant Bug", order: "Hemiptera", family: "Miridae", wiki: "Miridae", bugguide: "1", optional: true },
       { name: "Assassin Bug", order: "Hemiptera", family: "Reduviidae", wiki: "Reduviidae", bugguide: "1" },
       { name: "Metallic Shield Bug", order: "Hemiptera", family: "Scutelleridae", wiki: "Scutelleridae", bugguide: "1" },
-      { name: "Lace Bug", order: "Hemiptera", family: "Tingidae", wiki: "Tingidae", bugguide: "1" },
-      { name: "Seed Bug", order: "Hemiptera", family: "Lygaeidae", wiki: "Lygaeidae", bugguide: "1" },
+      { name: "Lace Bug", order: "Hemiptera", family: "Tingidae", wiki: "Tingidae", bugguide: "1", optional: true },
+      { name: "Seed Bug", order: "Hemiptera", family: "Lygaeidae", wiki: "Lygaeidae", bugguide: "1", optional: true },
       { name: "Leaf-footed Bug", order: "Hemiptera", family: "Coreidae", wiki: "Coreidae", bugguide: "1" },
       { name: "Stink Bug", order: "Hemiptera", family: "Pentatomidae", wiki: "Pentatomidae", bugguide: "1" },
       { name: "Cicada", order: "Hemiptera", family: "Cicadidae", wiki: "Cicadidae", bugguide: "1" },
@@ -522,7 +533,7 @@
       { name: "Water Boatman", order: "Hemiptera", family: "Corixidae", wiki: "Corixidae", bugguide: "1" },
       { name: "Backswimmer", order: "Hemiptera", family: "Notonectidae", wiki: "Notonectidae", bugguide: "1" },
       { name: "Giant Water Bug", order: "Hemiptera", family: "Belostomatidae", wiki: "Belostomatidae", bugguide: "1" },
-      { name: "Waterscorpion", order: "Hemiptera", family: "Nepidae", wiki: "Nepidae", bugguide: "1" },
+      { name: "Waterscorpion", order: "Hemiptera", family: "Nepidae", wiki: "Nepidae", bugguide: "1", optional: true },
       
       // Thysanoptera
       { name: "Thrips", order: "Thysanoptera", family: "Thripidae", wiki: "Thripidae", bugguide: "1" },
@@ -541,18 +552,18 @@
       { name: "Water Scavenger Beetle", order: "Coleoptera", family: "Hydrophilidae", wiki: "Hydrophilidae", bugguide: "1" },
       { name: "Water Penny Beetle", order: "Coleoptera", family: "Psephenidae", wiki: "Psephenidae", bugguide: "1" },
       { name: "Riffle Beetle", order: "Coleoptera", family: "Elmidae", wiki: "Elmidae", bugguide: "1" },
-      { name: "Hister Beetle", order: "Coleoptera", family: "Histeridae", wiki: "Histeridae", bugguide: "1" },
+      { name: "Hister Beetle", order: "Coleoptera", family: "Histeridae", wiki: "Histeridae", bugguide: "1", optional: true },
       { name: "Rove Beetle", order: "Coleoptera", family: "Staphylinidae", wiki: "Staphylinidae", bugguide: "1" },
-      { name: "Carrion Beetle", order: "Coleoptera", family: "Silphidae", wiki: "Silphidae", bugguide: "1" },
+      { name: "Carrion Beetle", order: "Coleoptera", family: "Silphidae", wiki: "Silphidae", bugguide: "1", optional: true },
       { name: "Stag Beetle", order: "Coleoptera", family: "Lucanidae", wiki: "Lucanidae", bugguide: "1" },
       { name: "Bess Beetle", order: "Coleoptera", family: "Passalidae", wiki: "Passalidae", bugguide: "1" },
       { name: "Dung Beetle", order: "Coleoptera", family: "Scarabaeidae", wiki: "Scarabaeidae", bugguide: "187" },
       { name: "Metallic Wood-boring Beetle", order: "Coleoptera", family: "Buprestidae", wiki: "Buprestidae", bugguide: "162" },
-      { name: "Click Beetle", order: "Coleoptera", family: "Elateridae", wiki: "Elateridae", bugguide: "1" },
-      { name: "Firefly", order: "Coleoptera", family: "Lampyridae", wiki: "Lampyridae", bugguide: "1" },
+      { name: "Click Beetle", order: "Coleoptera", family: "Elateridae", wiki: "Elateridae", bugguide: "1", optional: true },
+      { name: "Firefly", order: "Coleoptera", family: "Lampyridae", wiki: "Lampyridae", bugguide: "1", optional: true },
       { name: "Soldier Beetle", order: "Coleoptera", family: "Cantharidae", wiki: "Cantharidae", bugguide: "1" },
-      { name: "Net-winged Beetle", order: "Coleoptera", family: "Lycidae", wiki: "Lycidae", bugguide: "1" },
-      { name: "Checkered Beetle", order: "Coleoptera", family: "Cleridae", wiki: "Cleridae", bugguide: "1" },
+      { name: "Net-winged Beetle", order: "Coleoptera", family: "Lycidae", wiki: "Lycidae", bugguide: "1", optional: true },
+      { name: "Checkered Beetle", order: "Coleoptera", family: "Cleridae", wiki: "Cleridae", bugguide: "1", optional: true },
       { name: "Ladybug", order: "Coleoptera", family: "Coccinellidae", wiki: "Coccinellidae", bugguide: "179" },
       { name: "Darkling Beetle", order: "Coleoptera", family: "Tenebrionidae", wiki: "Tenebrionidae", bugguide: "1" },
       { name: "Blister Beetle", order: "Coleoptera", family: "Meloidae", wiki: "Meloidae", bugguide: "1" },
@@ -562,8 +573,8 @@
       { name: "Flat Bark Beetle", order: "Coleoptera", family: "Cucujidae", wiki: "Cucujidae", bugguide: "1" },
       
       // Mecoptera
-      { name: "Snow Scorpionfly", order: "Mecoptera", family: "Boreidae", wiki: "Boreidae", bugguide: "1" },
-      { name: "Common Scorpionfly", order: "Mecoptera", family: "Panorpidae", wiki: "Panorpidae", bugguide: "1" },
+      { name: "Snow Scorpionfly", order: "Mecoptera", family: "Boreidae", wiki: "Boreidae", bugguide: "1", optional: true },
+      { name: "Common Scorpionfly", order: "Mecoptera", family: "Panorpidae", wiki: "Panorpidae", bugguide: "1", optional: true },
       
       // Raphidioptera
       { name: "Snakefly", order: "Raphidioptera", family: "Raphidiidae", wiki: "Raphidiidae", bugguide: "1" },
@@ -575,18 +586,18 @@
       { name: "Crane Fly", order: "Diptera", family: "Tipulidae", wiki: "Tipulidae", bugguide: "1" },
       { name: "Mosquito", order: "Diptera", family: "Culicidae", wiki: "Culicidae", bugguide: "1" },
       { name: "Midge", order: "Diptera", family: "Chironomidae", wiki: "Chironomidae", bugguide: "1" },
-      { name: "Black Fly", order: "Diptera", family: "Simuliidae", wiki: "Simuliidae", bugguide: "1" },
+      { name: "Black Fly", order: "Diptera", family: "Simuliidae", wiki: "Simuliidae", bugguide: "1", optional: true },
       { name: "Soldier Fly", order: "Diptera", family: "Stratiomyidae", wiki: "Stratiomyidae", bugguide: "1" },
       { name: "Horse Fly", order: "Diptera", family: "Tabanidae", wiki: "Tabanidae", bugguide: "1" },
       { name: "Robber Fly", order: "Diptera", family: "Asilidae", wiki: "Asilidae", bugguide: "1" },
       { name: "Bee Fly", order: "Diptera", family: "Bombyliidae", wiki: "Bombyliidae", bugguide: "1" },
       { name: "Hover Fly", order: "Diptera", family: "Syrphidae", wiki: "Syrphidae", bugguide: "1" },
-      { name: "Fruit Fly", order: "Diptera", family: "Tephritidae", wiki: "Tephritidae", bugguide: "1" },
+      { name: "Fruit Fly", order: "Diptera", family: "Tephritidae", wiki: "Tephritidae", bugguide: "1", optional: true },
       { name: "Pomace Fly", order: "Diptera", family: "Drosophilidae", wiki: "Drosophilidae", bugguide: "1" },
       { name: "House Fly", order: "Diptera", family: "Muscidae", wiki: "Muscidae", bugguide: "1" },
       { name: "Blow Fly", order: "Diptera", family: "Calliphoridae", wiki: "Calliphoridae", bugguide: "1" },
-      { name: "Tachinid Fly", order: "Diptera", family: "Tachinidae", wiki: "Tachinidae", bugguide: "1" },
-      { name: "Botfly", order: "Diptera", family: "Oestridae", wiki: "Oestridae", bugguide: "1" },
+      { name: "Tachinid Fly", order: "Diptera", family: "Tachinidae", wiki: "Tachinidae", bugguide: "1", optional: true },
+      { name: "Botfly", order: "Diptera", family: "Oestridae", wiki: "Oestridae", bugguide: "1", optional: true },
       
       // Trichoptera
       { name: "Caddisfly", order: "Trichoptera", family: "Limnephilidae", wiki: "Limnephilidae", bugguide: "1" },
@@ -594,14 +605,14 @@
       // Lepidoptera
       { name: "Brush-footed Butterfly", order: "Lepidoptera", family: "Nymphalidae", wiki: "Nymphalidae", bugguide: "1" },
       { name: "Geometer Moth", order: "Lepidoptera", family: "Geometridae", wiki: "Geometridae", bugguide: "1" },
-      { name: "Tent Caterpillar Moth", order: "Lepidoptera", family: "Lasiocampidae", wiki: "Lasiocampidae", bugguide: "1" },
-      { name: "Snout Moth", order: "Lepidoptera", family: "Pyralidae", wiki: "Pyralidae", bugguide: "1" },
+      { name: "Tent Caterpillar Moth", order: "Lepidoptera", family: "Lasiocampidae", wiki: "Lasiocampidae", bugguide: "1", optional: true },
+      { name: "Snout Moth", order: "Lepidoptera", family: "Pyralidae", wiki: "Pyralidae", bugguide: "1", optional: true },
       { name: "Giant Silkworm Moth", order: "Lepidoptera", family: "Saturniidae", wiki: "Saturniidae", bugguide: "1" },
       { name: "Sphinx Moth", order: "Lepidoptera", family: "Sphingidae", wiki: "Sphingidae", bugguide: "1" },
       { name: "Tiger Moth", order: "Lepidoptera", family: "Erebidae", wiki: "Erebidae", bugguide: "1" },
       { name: "Owlet Moth", order: "Lepidoptera", family: "Noctuidae", wiki: "Noctuidae", bugguide: "1" },
       { name: "Clearwing Moth", order: "Lepidoptera", family: "Sesiidae", wiki: "Sesiidae", bugguide: "1" },
-      { name: "Tortrix Moth", order: "Lepidoptera", family: "Tortricidae", wiki: "Tortricidae", bugguide: "1" },
+      { name: "Tortrix Moth", order: "Lepidoptera", family: "Tortricidae", wiki: "Tortricidae", bugguide: "1", optional: true },
       { name: "Skipper", order: "Lepidoptera", family: "Hesperiidae", wiki: "Hesperiidae", bugguide: "1" },
       { name: "Swallowtail", order: "Lepidoptera", family: "Papilionidae", wiki: "Papilionidae", bugguide: "1" },
       { name: "White or Sulfur", order: "Lepidoptera", family: "Pieridae", wiki: "Pieridae", bugguide: "1" },
@@ -609,14 +620,14 @@
       
       // Hymenoptera
       { name: "Common Sawfly", order: "Hymenoptera", family: "Tenthredinidae", wiki: "Tenthredinidae", bugguide: "1" },
-      { name: "Horntail", order: "Hymenoptera", family: "Siricidae", wiki: "Siricidae", bugguide: "1" },
+      { name: "Horntail", order: "Hymenoptera", family: "Siricidae", wiki: "Siricidae", bugguide: "1", optional: true },
       { name: "Ichneumon", order: "Hymenoptera", family: "Ichneumonidae", wiki: "Ichneumonidae", bugguide: "1" },
-      { name: "Gall Wasp", order: "Hymenoptera", family: "Cynipidae", wiki: "Cynipidae", bugguide: "1" },
+      { name: "Gall Wasp", order: "Hymenoptera", family: "Cynipidae", wiki: "Cynipidae", bugguide: "1", optional: true },
       { name: "Velvet Ant", order: "Hymenoptera", family: "Mutillidae", wiki: "Mutillidae", bugguide: "1" },
       { name: "Ant", order: "Hymenoptera", family: "Formicidae", wiki: "Formicidae", bugguide: "1" },
       { name: "Paper Wasp", order: "Hymenoptera", family: "Vespidae", wiki: "Vespidae", bugguide: "1" },
       { name: "Thread-waisted Wasp", order: "Hymenoptera", family: "Sphecidae", wiki: "Sphecidae", bugguide: "1" },
-      { name: "Braconid Wasp", order: "Hymenoptera", family: "Braconidae", wiki: "Braconidae", bugguide: "1" },
+      { name: "Braconid Wasp", order: "Hymenoptera", family: "Braconidae", wiki: "Braconidae", bugguide: "1", optional: true },
       { name: "Sweat Bee", order: "Hymenoptera", family: "Halictidae", wiki: "Halictidae", bugguide: "1" },
       { name: "Leaf Cutter Bee", order: "Hymenoptera", family: "Megachilidae", wiki: "Megachilidae", bugguide: "1" },
       { name: "Honey Bee", order: "Hymenoptera", family: "Apidae", wiki: "Apidae", bugguide: "1" },
@@ -739,7 +750,7 @@
       
       orderGroups[order].forEach(async insect => {
         const card = document.createElement('div');
-        card.className = 'family-card';
+        card.className = 'family-card' + (insect.optional ? ' optional' : '');
         
         const imagePath = `images/${insect.order}/${insect.family}/specimen.jpg`;
         
