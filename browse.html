@@ -145,7 +145,23 @@
       font-size: 2em;
     }
     
-    .order-title.active { display: block; }
+    .order-title.active { display: flex; align-items: center; gap: 15px; }
+    
+    .order-links {
+      display: flex;
+      gap: 10px;
+      font-size: 0.5em;
+    }
+    
+    .order-links a {
+      background: #4ecca3;
+      color: #1a1a2e;
+      padding: 8px 16px;
+      text-decoration: none;
+      border-radius: 6px;
+    }
+    
+    .order-links a:hover { background: #3db892; }
   </style>
 </head>
 <body>
@@ -166,6 +182,26 @@
   </div>
 
   <script>
+    // BugGuide links - edit this object to add more links
+    const bugguideLinks = {
+      orders: {
+        "Coleoptera": "https://bugguide.net/node/view/60",
+        "Lepidoptera": "https://bugguide.net/node/view/81",
+        "Hymenoptera": "https://bugguide.net/node/view/91",
+        "Diptera": "https://bugguide.net/node/view/55",
+        "Hemiptera": "https://bugguide.net/node/view/78",
+        "Orthoptera": "https://bugguide.net/node/view/70",
+        "Odonata": "https://bugguide.net/node/view/191",
+        "Blattodea": "https://www.bugguide.net/node/view/342386"
+      },
+      families: {
+        "Coccinellidae": "https://bugguide.net/node/view/179",
+        "Carabidae": "https://bugguide.net/node/view/186",
+        "Scarabaeidae": "https://bugguide.net/node/view/187",
+        "Buprestidae": "https://bugguide.net/node/view/162"
+      }
+    };
+    
     const insectData = [
       // Protura
       { name: "Proturan", order: "Protura", family: "Protura", wiki: "Protura", bugguide: "1" },
@@ -378,7 +414,20 @@
       document.getElementById('family-grid').classList.add('active');
       document.getElementById('back-btn').classList.add('active');
       document.getElementById('order-title').classList.add('active');
-      document.getElementById('order-title').textContent = order;
+      
+      // Build order title with links
+      const orderLink = bugguideLinks.orders?.[order];
+      const bugguideButton = orderLink 
+        ? `<a href="${orderLink}" target="_blank">BugGuide</a>`
+        : '';
+      
+      document.getElementById('order-title').innerHTML = `
+        <span>${order}</span>
+        <div class="order-links">
+          <a href="https://en.wikipedia.org/wiki/${order}" target="_blank">Wikipedia</a>
+          ${bugguideButton}
+        </div>
+      `;
       
       const familyGrid = document.getElementById('family-grid');
       familyGrid.innerHTML = '';
@@ -389,6 +438,13 @@
         
         const imagePath = `images/${insect.order}/${insect.family}/specimen.jpg`;
         
+        // Check if BugGuide link exists for this specific family only (no fallback to order)
+        const familyLink = bugguideLinks.families?.[insect.family];
+        
+        const bugguideButton = familyLink 
+          ? `<a href="${familyLink}" target="_blank">BugGuide</a>`
+          : '';
+        
         card.innerHTML = `
           <h4>${insect.family}</h4>
           <div class="common-name">${insect.name}</div>
@@ -397,7 +453,7 @@
           </div>
           <div class="links">
             <a href="https://en.wikipedia.org/wiki/${insect.wiki}" target="_blank">Wikipedia</a>
-            <a href="https://bugguide.net/node/view/${insect.bugguide}" target="_blank">BugGuide</a>
+            ${bugguideButton}
           </div>
         `;
         
@@ -411,14 +467,15 @@
     async function loadImage(insect, localPath) {
       const container = document.getElementById(`img-${insect.family}`);
       
-      // Try local image first
+      // Try local image first (silently)
       const localImg = new Image();
+      
       localImg.onload = function() {
         container.innerHTML = `<img src="${localPath}" alt="${insect.name}">`;
       };
       
       localImg.onerror = async function() {
-        // Local image not found, try Wikipedia
+        // Local image not found (expected), try Wikipedia
         try {
           const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(insect.wiki)}`;
           const res = await fetch(url);
@@ -435,6 +492,7 @@
         }
       };
       
+      // Set src to trigger load attempt
       localImg.src = localPath;
     }
 
