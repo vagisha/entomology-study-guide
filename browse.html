@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Browse Insects - Entomology Study Guide</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { 
@@ -739,6 +740,7 @@
           <a href="https://en.wikipedia.org/wiki/${order}" target="_blank">Wikipedia</a>
           <a href="https://genent.cals.ncsu.edu/insect-identification/order-${order.toLowerCase()}/" target="_blank">NC State</a>
           ${bugguideButton}
+          <button onclick="exportOrderPDF('${order}')" style="background: #74c69d; color: #2c3e50; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">📄 Export PDF</button>
         </div>
       `;
       
@@ -1028,6 +1030,200 @@
       URL.revokeObjectURL(url);
       
       alert(`Exported ${Object.keys(notes.orderNotes).length} order notes and ${Object.keys(notes.familyNotes).length} family notes!`);
+    }
+    
+    // Export order to PDF with images and notes
+    async function exportOrderPDF(order) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      const contentWidth = pageWidth - (2 * margin);
+      
+      let yPos = margin;
+      
+      // Title
+      doc.setFontSize(20);
+      doc.setTextColor(64, 145, 108);
+      doc.text(String(order), margin, yPos);
+      yPos += 10;
+      
+      // Order info
+      const info = orderInfo[order];
+      if (info) {
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        const commonName = String(info.commonName || 'N/A').replace(/[^\x00-\x7F]/g, '');
+        doc.text('Common Name: ' + commonName, margin, yPos);
+        yPos += 6;
+        
+        // Get metamorphosis type
+        let metamorphosisType = '';
+        for (const [type, data] of Object.entries(metamorphosisTypes)) {
+          if (data.orders.includes(order)) {
+            if (type === 'ametabolous') metamorphosisType = 'Ametabolous';
+            else if (type === 'hemimetabolous') metamorphosisType = 'Hemimetabolous';
+            else if (type === 'holometabolous') metamorphosisType = 'Holometabolous';
+            break;
+          }
+        }
+        doc.text('Metamorphosis: ' + metamorphosisType, margin, yPos);
+        yPos += 10;
+      }
+      
+      // Order notes
+      const orderNote = NotesManager.getOrderNote(order);
+      if (orderNote) {
+        doc.setFontSize(12);
+        doc.setTextColor(64, 145, 108);
+        doc.text('Order Notes:', margin, yPos);
+        yPos += 6;
+        doc.setFontSize(9);
+        doc.setTextColor(0, 0, 0);
+        const cleanNote = String(orderNote).replace(/[^\x00-\x7F]/g, '');
+        const noteLines = doc.splitTextToSize(cleanNote, contentWidth);
+        doc.text(noteLines, margin, yPos);
+        yPos += (noteLines.length * 5) + 5;
+      }
+      
+      // Add new page for the family grid to avoid overlap
+      doc.addPage();
+      
+      // Get families for this order (exclude optional ones)
+      const families = orderGroups[order].filter(insect => !insect.optional);
+      
+      // Layout in 2x2 grid (4 families per page)
+      const cellWidth = (contentWidth - 10) / 2; // 10 for gap between columns
+      const cellHeight = 120; // Height per cell including space for notes
+      const gapX = 10;
+      const gapY = 10;
+      
+      for (let i = 0; i < families.length; i++) {
+        const insect = families[i];
+        
+        // Calculate position in 2x2 grid
+        const row = Math.floor((i % 4) / 2);
+        const col = (i % 4) % 2;
+        
+        // Add new page after every 4 families (but not on the first iteration)
+        if (i > 0 && i % 4 === 0) {
+          doc.addPage();
+        }
+        
+        const cellX = margin + (col * (cellWidth + gapX));
+        const cellY = (i % 4 < 2) ? margin : margin + cellHeight + gapY;
+        
+        // Draw cell border
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(cellX, cellY, cellWidth, cellHeight);
+        
+        let cellYPos = cellY + 8;
+        
+        // Family name
+        doc.setFontSize(11);
+        doc.setTextColor(64, 145, 108);
+        const familyName = String(insect.family);
+        doc.text(familyName, cellX + 5, cellYPos);
+        cellYPos += 6;
+        
+        // Common name (larger font)
+        doc.setFontSize(10);
+        doc.setTextColor(0, 0, 0);
+        const commonName = String(insect.name).replace(/[^\x00-\x7F]/g, '');
+        const nameLines = doc.splitTextToSize(commonName, cellWidth - 10);
+        doc.text(nameLines, cellX + 5, cellYPos);
+        cellYPos += (nameLines.length * 5) + 3;
+        
+        // Try to load and add image
+        try {
+          const imgElement = document.querySelector('#img-' + insect.family + ' img');
+          if (imgElement && imgElement.src) {
+            const imgData = await getImageDataURL(imgElement.src);
+            if (imgData) {
+              // Calculate aspect ratio to prevent cropping
+              const maxImgWidth = cellWidth - 10;
+              const maxImgHeight = 35;
+              
+              // Get actual image dimensions
+              const img = new Image();
+              img.src = imgElement.src;
+              await new Promise(resolve => {
+                img.onload = resolve;
+                img.onerror = resolve;
+              });
+              
+              const aspectRatio = img.width / img.height;
+              let imgWidth = maxImgWidth;
+              let imgHeight = imgWidth / aspectRatio;
+              
+              // If height exceeds max, scale by height instead
+              if (imgHeight > maxImgHeight) {
+                imgHeight = maxImgHeight;
+                imgWidth = imgHeight * aspectRatio;
+              }
+              
+              doc.addImage(imgData, 'JPEG', cellX + 5, cellYPos, imgWidth, imgHeight);
+              cellYPos += imgHeight + 3;
+            }
+          }
+        } catch (error) {
+          console.log('Could not add image for ' + insect.family);
+        }
+        
+        // Family notes (if any)
+        const familyNote = NotesManager.getFamilyNote(insect.family);
+        if (familyNote) {
+          doc.setFontSize(9);
+          doc.setTextColor(100, 100, 100);
+          const cleanNote = String(familyNote).replace(/[^\x00-\x7F]/g, '');
+          const noteLines = doc.splitTextToSize(cleanNote, cellWidth - 10);
+          // Only show first few lines to fit in cell
+          const maxNoteLines = 3;
+          const displayLines = noteLines.slice(0, maxNoteLines);
+          doc.text(displayLines, cellX + 5, cellYPos);
+          if (noteLines.length > maxNoteLines) {
+            cellYPos += (maxNoteLines * 4);
+            doc.text('...', cellX + 5, cellYPos);
+          }
+        } else {
+          // Add "Notes:" label with space for handwritten notes (larger font)
+          doc.setFontSize(9);
+          doc.setTextColor(150, 150, 150);
+          doc.text('Notes: ___________________________', cellX + 5, cellYPos);
+          cellYPos += 6;
+          doc.text('_____________________________________', cellX + 5, cellYPos);
+          cellYPos += 6;
+          doc.text('_____________________________________', cellX + 5, cellYPos);
+        }
+      }
+      
+      // Save PDF
+      doc.save(order + '-study-guide.pdf');
+    }
+    
+    // Helper function to convert image to data URL
+    async function getImageDataURL(url) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          try {
+            resolve(canvas.toDataURL('image/jpeg', 0.8));
+          } catch (e) {
+            resolve(null);
+          }
+        };
+        img.onerror = function() {
+          resolve(null);
+        };
+        img.src = url;
+      });
     }
 
     // Initialize
