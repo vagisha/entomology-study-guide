@@ -69,6 +69,10 @@
       transition: transform 0.2s;
     }
     
+    .order-card.optional {
+      border: 4px dashed #ffa500;
+    }
+    
     .order-card:hover { transform: translateY(-5px); }
     .order-card h3 { margin-bottom: 5px; }
     .order-card .count { opacity: 0.8; font-size: 0.9em; }
@@ -346,73 +350,85 @@
         meaning: "Avoiding light",
         characteristics: "Head under thorax",
         wings: "2 pairs, leathery",
-        children: "Nymphs – like adults but no wings"
+        children: "Nymphs – like adults but no wings",
+        commonName: "Cockroaches & Termites"
       },
       "Coleoptera": {
         meaning: "Hard wings",
         characteristics: "Hard shell",
         wings: "2 pairs, front wings hardened",
-        children: "Larvae – variable: grub-like or worm-like"
+        children: "Larvae – variable: grub-like or worm-like",
+        commonName: "Beetles"
       },
       "Dermaptera": {
         meaning: "Leathery wings",
         characteristics: "Pincer tails",
         wings: "2 pairs, short, tough",
-        children: "Nymphs – like adults but no wings"
+        children: "Nymphs – like adults but no wings",
+        commonName: "Earwigs"
       },
       "Diptera": {
         meaning: "Two wings",
         characteristics: "Only one pair of wings",
         wings: "1 pair only",
-        children: "Larvae – maggots"
+        children: "Larvae – maggots",
+        commonName: "True Flies"
       },
       "Hemiptera": {
         meaning: "Half wings",
         characteristics: "Sucking mouthparts",
         wings: "Variable - 2 pairs, X shaped or colored line OR wings colored or clear held straight over back OR wingless (ex. Scale insect)",
-        children: "Nymphs – like adults but wingless"
+        children: "Nymphs – like adults but wingless",
+        commonName: "True Bugs (cicadas, aphids, planthoppers, leafhoppers, assassin bugs, bed bugs, shield bugs)"
       },
       "Hymenoptera": {
         meaning: "Membrane wings",
         characteristics: "Wasp waist & stingers",
         wings: "2 pairs, except most ants (no wings)",
-        children: "Larvae – maggot or grub-like"
+        children: "Larvae – maggot or grub-like",
+        commonName: "Bees, Wasps, Ants & Sawflies"
       },
       "Lepidoptera": {
         meaning: "Scaly wings",
         characteristics: "Colored scales on wings",
         wings: "2 pairs with colored scales",
-        children: "Larvae – caterpillars"
+        children: "Larvae – caterpillars",
+        commonName: "Butterflies & Moths"
       },
       "Orthoptera": {
         meaning: "Straight wings",
         characteristics: "Jumping hind legs",
         wings: "2 pairs, folded over back",
-        children: "Nymphs – like adults but no wings"
+        children: "Nymphs – like adults but no wings",
+        commonName: "Grasshoppers, Crickets & Katydids"
       },
       "Mantodea": {
         meaning: "Like a prophet",
         characteristics: "Grabbing front legs",
         wings: "2 pairs, doubled over on back",
-        children: "Nymphs – like adults but no wings"
+        children: "Nymphs – like adults but no wings",
+        commonName: "Mantises"
       },
       "Neuroptera": {
         meaning: "Nerve wings",
         characteristics: "Net like wings",
         wings: "2 pairs w/ lots of veins, tent-like",
-        children: "Larvae – long & flat, w/ BIG mandibles"
+        children: "Larvae – long & flat, w/ BIG mandibles",
+        commonName: "Lacewings & Antlions"
       },
       "Odonata": {
         meaning: "Toothed flies",
         characteristics: "Enormous eyes",
         wings: "2 pairs: do not fold over back",
-        children: "Nymphs – aquatic"
+        children: "Nymphs – aquatic",
+        commonName: "Dragonflies & Damselflies"
       },
       "Phasmatodea": {
         meaning: "Like a ghost",
         characteristics: "Stick-like body",
         wings: "2 pairs (males), females wingless",
-        children: "Nymphs – like adults but wingless"
+        children: "Nymphs – like adults but wingless",
+        commonName: "Walkingsticks"
       }
     };
     
@@ -673,10 +689,19 @@
           if (orderGroups[order]) {
             const count = orderGroups[order].length;
             const card = document.createElement('div');
-            card.className = 'order-card';
+            
+            // Check if all families in this order are optional
+            const allOptional = orderGroups[order].every(insect => insect.optional);
+            card.className = 'order-card' + (allOptional ? ' optional' : '');
+            
+            // Get common name for the order if available
+            const commonName = orderInfo[order]?.commonName || '';
+            const commonNameDisplay = commonName ? `<div style="margin-top: 8px; font-size: 0.9em; opacity: 0.85; font-style: italic;">${commonName}</div>` : '';
+            
             card.innerHTML = `
-              <h3>${order}</h3>
+              <h3>${order}${allOptional ? ' ⭐' : ''}</h3>
               <div class="count">${count} ${count === 1 ? 'family' : 'families'}</div>
+              ${commonNameDisplay}
             `;
             card.onclick = () => showFamilies(order);
             grid.appendChild(card);
