@@ -610,7 +610,7 @@
       { name: "Bee Fly", order: "Diptera", family: "Bombyliidae", wiki: "Bombyliidae", bugguide: "1" },
       { name: "Hover Fly", order: "Diptera", family: "Syrphidae", wiki: "Syrphidae", bugguide: "1" },
       { name: "Fruit Fly", order: "Diptera", family: "Tephritidae", wiki: "Tephritidae", bugguide: "1", optional: true },
-      { name: "Pomace Fly", order: "Diptera", family: "Drosophilidae", wiki: "Drosophilidae", bugguide: "1" },
+      { name: "Pomace Fly, Fruit / Vinegar Fly", order: "Diptera", family: "Drosophilidae", wiki: "Drosophilidae", bugguide: "1" },
       { name: "House Fly", order: "Diptera", family: "Muscidae", wiki: "Muscidae", bugguide: "1" },
       { name: "Blow Fly", order: "Diptera", family: "Calliphoridae", wiki: "Calliphoridae", bugguide: "1" },
       { name: "Tachinid Fly", order: "Diptera", family: "Tachinidae", wiki: "Tachinidae", bugguide: "1", optional: true },
@@ -735,9 +735,29 @@
       // Display order information if available
       const infoBox = document.getElementById('order-info-box');
       const info = orderInfo[order];
+      
+      // Determine metamorphosis type
+      let metamorphosisType = '';
+      for (const [type, data] of Object.entries(metamorphosisTypes)) {
+        if (data.orders.includes(order)) {
+          if (type === 'ametabolous') {
+            metamorphosisType = 'Ametabolous (No Metamorphosis)';
+          } else if (type === 'hemimetabolous') {
+            metamorphosisType = 'Hemimetabolous (Incomplete Metamorphosis)';
+          } else if (type === 'holometabolous') {
+            metamorphosisType = 'Holometabolous (Complete Metamorphosis)';
+          }
+          break;
+        }
+      }
+      
       if (info) {
         infoBox.innerHTML = `
           <h3>Order Characteristics</h3>
+          <div class="info-row">
+            <span class="info-label">Metamorphosis:</span>
+            <span class="info-value">${metamorphosisType}</span>
+          </div>
           <div class="info-row">
             <span class="info-label">Meaning:</span>
             <span class="info-value">'${info.meaning}'</span>
@@ -787,6 +807,81 @@
           ? `<a href="${familyLink}" target="_blank">BugGuide</a>`
           : '';
         
+        // Determine NC State link based on order
+        let ncStateLink;
+        if (insect.order === 'Protura') {
+          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/class-protura/';
+        } else if (insect.order === 'Diplura') {
+          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/class-diplura/';
+        } else if (insect.order === 'Archaeognatha') {
+          ncStateLink = 'https://genent.cals.ncsu.edu/bug-bytes/apterygota/';
+        } else if (insect.order === 'Blattodea' && insect.family === 'Blattidae') {
+          // NC State only has info for Blattidae
+          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/order-blattodea/';
+        } else if (insect.order === 'Blattodea') {
+          // No NC State link for Termitidae and Cryptocercidae
+          ncStateLink = null;
+        } else if (insect.order === 'Megaloptera') {
+          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/megaloptera/';
+        } else if (insect.order === 'Neuroptera' && insect.family === 'Myrmeleontidae') {
+          // Special case: Myrmeleontidae is under megaloptera URL
+          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/megaloptera/family-myrmeleontidae/';
+        } else if (insect.order === 'Hemiptera') {
+          // Hemiptera families need suborder in the URL
+          const hemipteraSuborders = {
+            // Heteroptera (true bugs)
+            'Gelastocoridae': 'heteroptera',
+            'Gerridae': 'heteroptera',
+            'Cimicidae': 'heteroptera',
+            'Miridae': 'heteroptera',
+            'Reduviidae': 'heteroptera',
+            'Scutelleridae': 'heteroptera',
+            'Tingidae': 'heteroptera',
+            'Lygaeidae': 'heteroptera',
+            'Coreidae': 'heteroptera',
+            'Pentatomidae': 'heteroptera',
+            'Corixidae': 'heteroptera',
+            'Notonectidae': 'heteroptera',
+            'Belostomatidae': 'heteroptera',
+            'Nepidae': 'heteroptera',
+            // Homoptera (cicadas, hoppers, aphids, scales)
+            'Cicadidae': 'homoptera',
+            'Membracidae': 'homoptera',
+            'Cercopidae': 'homoptera',
+            'Cicadellidae': 'homoptera',
+            'Aphididae': 'homoptera',
+            'Pseudococcidae': 'homoptera',
+            'Coccidae': 'homoptera'
+          };
+          
+          // Special case URLs for some families
+          if (insect.family === 'Aphididae') {
+            ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/order-hemiptera-suborder-homoptera/family-aphidoidea/';
+          } else if (insect.family === 'Coccidae') {
+            ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/order-hemiptera-suborder-homoptera/family-coccoidea/';
+          } else if (insect.family === 'Reduviidae') {
+            ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/order-hemiptera-suborder-heteroptera/family-reduviidae-2/';
+          } else if (insect.family === 'Fulgoridae') {
+            // No NC State link for Fulgoridae
+            ncStateLink = null;
+          } else {
+            const suborder = hemipteraSuborders[insect.family];
+            if (suborder) {
+              ncStateLink = `https://genent.cals.ncsu.edu/insect-identification/order-hemiptera-suborder-${suborder}/family-${insect.family.toLowerCase()}/`;
+            } else {
+              ncStateLink = null;
+            }
+          }
+        } else if (orderGroups[insect.order].length > 1) {
+          ncStateLink = `https://genent.cals.ncsu.edu/insect-identification/order-${insect.order.toLowerCase()}/family-${insect.family.toLowerCase()}/`;
+        } else {
+          ncStateLink = `https://genent.cals.ncsu.edu/insect-identification/order-${insect.order.toLowerCase()}/`;
+        }
+        
+        const ncStateButton = ncStateLink 
+          ? `<a href="${ncStateLink}" target="_blank">NC State</a>`
+          : '';
+        
         const familyNote = NotesManager.getFamilyNote(insect.family);
         const notePreview = familyNote ? `<div class="notes-display">${familyNote.substring(0, 100)}${familyNote.length > 100 ? '...' : ''}</div>` : '';
         
@@ -798,7 +893,7 @@
           </div>
           <div class="links">
             <a href="https://en.wikipedia.org/wiki/${insect.wiki}" target="_blank">Wikipedia</a>
-            <a href="https://genent.cals.ncsu.edu/insect-identification/order-${insect.order.toLowerCase()}/family-${insect.family.toLowerCase()}/" target="_blank">NC State</a>
+            ${ncStateButton}
             ${bugguideButton}
           </div>
           ${notePreview}
