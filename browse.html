@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Insects - Entomology Study Guide</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      font-family: system-ui, sans-serif; 
+      background: #1a1a2e; 
+      color: #eee; 
+      min-height: 100vh; 
+      padding: 20px; 
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    h1 { color: #4ecca3; margin-bottom: 10px; }
+    .nav-links {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .nav-links a {
+      background: #333;
+      color: #4ecca3;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 8px;
+    }
+    .nav-links a:hover { background: #444; }
+    
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    .order-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    
+    .order-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    
+    .order-card:hover { transform: translateY(-5px); }
+    .order-card h3 { margin-bottom: 5px; }
+    .order-card .count { opacity: 0.8; font-size: 0.9em; }
+    
+    .family-grid {
+      display: none;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .family-grid.active { display: grid; }
+    
+    .family-card {
+      background: #2a2a3e;
+      border-radius: 12px;
+      padding: 15px;
+      border: 2px solid #444;
+    }
+    
+    .family-card h4 {
+      color: #4ecca3;
+      margin-bottom: 5px;
+    }
+    
+    .family-card .common-name {
+      color: #aaa;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+    
+    .image-container {
+      width: 100%;
+      height: 200px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .image-container .placeholder {
+      color: #666;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .links {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .links a {
+      flex: 1;
+      background: #4ecca3;
+      color: #1a1a2e;
+      padding: 8px;
+      text-align: center;
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.85em;
+    }
+    
+    .links a:hover { background: #3db892; }
+    
+    .back-btn {
+      background: #333;
+      color: #4ecca3;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 20px;
+      display: none;
+    }
+    
+    .back-btn.active { display: inline-block; }
+    .back-btn:hover { background: #444; }
+    
+    .order-title {
+      display: none;
+      color: #4ecca3;
+      margin-bottom: 20px;
+      font-size: 2em;
+    }
+    
+    .order-title.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🐛 Entomology Study Guide</h1>
+    <div class="nav-links">
+      <a href="index.html">Flashcards</a>
+      <a href="browse.html">Browse Insects</a>
+    </div>
+  </div>
+
+  <div class="container">
+    <button class="back-btn" id="back-btn" onclick="showOrders()">← Back to Orders</button>
+    <h2 class="order-title" id="order-title"></h2>
+    
+    <div class="order-list" id="order-list"></div>
+    <div class="family-grid" id="family-grid"></div>
+  </div>
+
+  <script>
+    const insectData = [
+      // Protura
+      { name: "Proturan", order: "Protura", family: "Protura", wiki: "Protura", bugguide: "1" },
+      
+      // Diplura
+      { name: "Dipluran", order: "Diplura", family: "Diplura", wiki: "Diplura", bugguide: "1" },
+      
+      // Archaeognatha
+      { name: "Bristletail", order: "Archaeognatha", family: "Archaeognatha", wiki: "Archaeognatha", bugguide: "1" },
+      
+      // Zygentoma
+      { name: "Silverfish/Firebrat", order: "Zygentoma", family: "Zygentoma", wiki: "Zygentoma", bugguide: "1" },
+      
+      // Ephemeroptera
+      { name: "Mayfly", order: "Ephemeroptera", family: "Ephemeridae", wiki: "Ephemeridae", bugguide: "1" },
+      
+      // Odonata
+      { name: "Darner", order: "Odonata", family: "Aeshnidae", wiki: "Aeshnidae", bugguide: "1" },
+      { name: "Clubtail", order: "Odonata", family: "Gomphidae", wiki: "Gomphidae", bugguide: "1" },
+      { name: "Skimmer", order: "Odonata", family: "Libellulidae", wiki: "Libellulidae", bugguide: "1" },
+      { name: "Spread-wing Damselfly", order: "Odonata", family: "Lestidae", wiki: "Lestidae", bugguide: "1" },
+      { name: "Narrow-winged Damselfly", order: "Odonata", family: "Coenagrionidae", wiki: "Coenagrionidae", bugguide: "1" },
+      
+      // Blattodea
+      { name: "Termite", order: "Blattodea", family: "Termitidae", wiki: "Termitidae", bugguide: "1" },
+      { name: "Household Roach", order: "Blattodea", family: "Blattidae", wiki: "Blattidae", bugguide: "1" },
+      { name: "Brown-hooded Roach", order: "Blattodea", family: "Cryptocercidae", wiki: "Cryptocercidae", bugguide: "1" },
+      
+      // Mantodea
+      { name: "Mantis", order: "Mantodea", family: "Mantidae", wiki: "Mantidae", bugguide: "1" },
+      
+      // Embioptera
+      { name: "Webspinner", order: "Embioptera", family: "Embioptera", wiki: "Embioptera", bugguide: "1" },
+      
+      // Dermaptera
+      { name: "Earwig", order: "Dermaptera", family: "Dermaptera", wiki: "Dermaptera", bugguide: "1" },
+      
+      // Plecoptera
+      { name: "Stonefly", order: "Plecoptera", family: "Perlidae", wiki: "Perlidae", bugguide: "1" },
+      
+      // Orthoptera
+      { name: "Pygmy Grasshopper", order: "Orthoptera", family: "Tetrigidae", wiki: "Tetrigidae", bugguide: "1" },
+      { name: "Grasshopper", order: "Orthoptera", family: "Acrididae", wiki: "Acrididae", bugguide: "1" },
+      { name: "Katydid", order: "Orthoptera", family: "Tettigoniidae", wiki: "Tettigoniidae", bugguide: "1" },
+      { name: "Camel Cricket", order: "Orthoptera", family: "Rhaphidophoridae", wiki: "Rhaphidophoridae", bugguide: "1" },
+      { name: "Cricket", order: "Orthoptera", family: "Gryllidae", wiki: "Gryllidae", bugguide: "1" },
+      { name: "Mole Cricket", order: "Orthoptera", family: "Gryllotalpidae", wiki: "Gryllotalpidae", bugguide: "1" },
+      
+      // Phasmatodea
+      { name: "Walkingstick", order: "Phasmatodea", family: "Diapheromeridae", wiki: "Diapheromeridae", bugguide: "1" },
+      
+      // Psocodea
+      { name: "Book/Bark Lice", order: "Psocodea", family: "Psocodea", wiki: "Psocodea", bugguide: "1" },
+      
+      // Hemiptera
+      { name: "Toad Bug", order: "Hemiptera", family: "Gelastocoridae", wiki: "Gelastocoridae", bugguide: "1" },
+      { name: "Water Strider", order: "Hemiptera", family: "Gerridae", wiki: "Gerridae", bugguide: "1" },
+      { name: "Bed Bug", order: "Hemiptera", family: "Cimicidae", wiki: "Cimicidae", bugguide: "1" },
+      { name: "Plant Bug", order: "Hemiptera", family: "Miridae", wiki: "Miridae", bugguide: "1" },
+      { name: "Assassin Bug", order: "Hemiptera", family: "Reduviidae", wiki: "Reduviidae", bugguide: "1" },
+      { name: "Metallic Shield Bug", order: "Hemiptera", family: "Scutelleridae", wiki: "Scutelleridae", bugguide: "1" },
+      { name: "Lace Bug", order: "Hemiptera", family: "Tingidae", wiki: "Tingidae", bugguide: "1" },
+      { name: "Seed Bug", order: "Hemiptera", family: "Lygaeidae", wiki: "Lygaeidae", bugguide: "1" },
+      { name: "Leaf-footed Bug", order: "Hemiptera", family: "Coreidae", wiki: "Coreidae", bugguide: "1" },
+      { name: "Stink Bug", order: "Hemiptera", family: "Pentatomidae", wiki: "Pentatomidae", bugguide: "1" },
+      { name: "Cicada", order: "Hemiptera", family: "Cicadidae", wiki: "Cicadidae", bugguide: "1" },
+      { name: "Treehopper", order: "Hemiptera", family: "Membracidae", wiki: "Membracidae", bugguide: "1" },
+      { name: "Froghopper", order: "Hemiptera", family: "Cercopidae", wiki: "Cercopidae", bugguide: "1" },
+      { name: "Leafhopper", order: "Hemiptera", family: "Cicadellidae", wiki: "Cicadellidae", bugguide: "1" },
+      { name: "Planthopper", order: "Hemiptera", family: "Fulgoridae", wiki: "Fulgoridae", bugguide: "1" },
+      { name: "Aphid", order: "Hemiptera", family: "Aphididae", wiki: "Aphididae", bugguide: "1" },
+      { name: "Mealybug", order: "Hemiptera", family: "Pseudococcidae", wiki: "Pseudococcidae", bugguide: "1" },
+      { name: "Soft Scale", order: "Hemiptera", family: "Coccidae", wiki: "Coccidae", bugguide: "1" },
+      { name: "Water Boatman", order: "Hemiptera", family: "Corixidae", wiki: "Corixidae", bugguide: "1" },
+      { name: "Backswimmer", order: "Hemiptera", family: "Notonectidae", wiki: "Notonectidae", bugguide: "1" },
+      { name: "Giant Water Bug", order: "Hemiptera", family: "Belostomatidae", wiki: "Belostomatidae", bugguide: "1" },
+      { name: "Waterscorpion", order: "Hemiptera", family: "Nepidae", wiki: "Nepidae", bugguide: "1" },
+      
+      // Thysanoptera
+      { name: "Thrips", order: "Thysanoptera", family: "Thripidae", wiki: "Thripidae", bugguide: "1" },
+      
+      // Megaloptera
+      { name: "Dobsonfly", order: "Megaloptera", family: "Corydalidae", wiki: "Corydalidae", bugguide: "1" },
+      
+      // Neuroptera
+      { name: "Green Lacewing", order: "Neuroptera", family: "Chrysopidae", wiki: "Chrysopidae", bugguide: "1" },
+      { name: "Antlion", order: "Neuroptera", family: "Myrmeleontidae", wiki: "Myrmeleontidae", bugguide: "1" },
+      
+      // Coleoptera
+      { name: "Ground Beetle", order: "Coleoptera", family: "Carabidae", wiki: "Carabidae", bugguide: "180" },
+      { name: "Predaceous Diving Beetle", order: "Coleoptera", family: "Dytiscidae", wiki: "Dytiscidae", bugguide: "1" },
+      { name: "Whirligig Beetle", order: "Coleoptera", family: "Gyrinidae", wiki: "Gyrinidae", bugguide: "1" },
+      { name: "Water Scavenger Beetle", order: "Coleoptera", family: "Hydrophilidae", wiki: "Hydrophilidae", bugguide: "1" },
+      { name: "Water Penny Beetle", order: "Coleoptera", family: "Psephenidae", wiki: "Psephenidae", bugguide: "1" },
+      { name: "Riffle Beetle", order: "Coleoptera", family: "Elmidae", wiki: "Elmidae", bugguide: "1" },
+      { name: "Hister Beetle", order: "Coleoptera", family: "Histeridae", wiki: "Histeridae", bugguide: "1" },
+      { name: "Rove Beetle", order: "Coleoptera", family: "Staphylinidae", wiki: "Staphylinidae", bugguide: "1" },
+      { name: "Carrion Beetle", order: "Coleoptera", family: "Silphidae", wiki: "Silphidae", bugguide: "1" },
+      { name: "Stag Beetle", order: "Coleoptera", family: "Lucanidae", wiki: "Lucanidae", bugguide: "1" },
+      { name: "Bess Beetle", order: "Coleoptera", family: "Passalidae", wiki: "Passalidae", bugguide: "1" },
+      { name: "Dung Beetle", order: "Coleoptera", family: "Scarabaeidae", wiki: "Scarabaeidae", bugguide: "187" },
+      { name: "Metallic Wood-boring Beetle", order: "Coleoptera", family: "Buprestidae", wiki: "Buprestidae", bugguide: "162" },
+      { name: "Click Beetle", order: "Coleoptera", family: "Elateridae", wiki: "Elateridae", bugguide: "1" },
+      { name: "Firefly", order: "Coleoptera", family: "Lampyridae", wiki: "Lampyridae", bugguide: "1" },
+      { name: "Soldier Beetle", order: "Coleoptera", family: "Cantharidae", wiki: "Cantharidae", bugguide: "1" },
+      { name: "Net-winged Beetle", order: "Coleoptera", family: "Lycidae", wiki: "Lycidae", bugguide: "1" },
+      { name: "Checkered Beetle", order: "Coleoptera", family: "Cleridae", wiki: "Cleridae", bugguide: "1" },
+      { name: "Ladybug", order: "Coleoptera", family: "Coccinellidae", wiki: "Coccinellidae", bugguide: "179" },
+      { name: "Darkling Beetle", order: "Coleoptera", family: "Tenebrionidae", wiki: "Tenebrionidae", bugguide: "1" },
+      { name: "Blister Beetle", order: "Coleoptera", family: "Meloidae", wiki: "Meloidae", bugguide: "1" },
+      { name: "Long-horned Beetle", order: "Coleoptera", family: "Cerambycidae", wiki: "Cerambycidae", bugguide: "1" },
+      { name: "Leaf Beetle", order: "Coleoptera", family: "Chrysomelidae", wiki: "Chrysomelidae", bugguide: "1" },
+      { name: "Weevil", order: "Coleoptera", family: "Curculionidae", wiki: "Curculionidae", bugguide: "1" },
+      { name: "Flat Bark Beetle", order: "Coleoptera", family: "Cucujidae", wiki: "Cucujidae", bugguide: "1" },
+      
+      // Mecoptera
+      { name: "Snow Scorpionfly", order: "Mecoptera", family: "Boreidae", wiki: "Boreidae", bugguide: "1" },
+      { name: "Common Scorpionfly", order: "Mecoptera", family: "Panorpidae", wiki: "Panorpidae", bugguide: "1" },
+      
+      // Raphidioptera
+      { name: "Snakefly", order: "Raphidioptera", family: "Raphidiidae", wiki: "Raphidiidae", bugguide: "1" },
+      
+      // Siphonaptera
+      { name: "Flea", order: "Siphonaptera", family: "Siphonaptera", wiki: "Siphonaptera", bugguide: "1" },
+      
+      // Diptera
+      { name: "Crane Fly", order: "Diptera", family: "Tipulidae", wiki: "Tipulidae", bugguide: "1" },
+      { name: "Mosquito", order: "Diptera", family: "Culicidae", wiki: "Culicidae", bugguide: "1" },
+      { name: "Midge", order: "Diptera", family: "Chironomidae", wiki: "Chironomidae", bugguide: "1" },
+      { name: "Black Fly", order: "Diptera", family: "Simuliidae", wiki: "Simuliidae", bugguide: "1" },
+      { name: "Soldier Fly", order: "Diptera", family: "Stratiomyidae", wiki: "Stratiomyidae", bugguide: "1" },
+      { name: "Horse Fly", order: "Diptera", family: "Tabanidae", wiki: "Tabanidae", bugguide: "1" },
+      { name: "Robber Fly", order: "Diptera", family: "Asilidae", wiki: "Asilidae", bugguide: "1" },
+      { name: "Bee Fly", order: "Diptera", family: "Bombyliidae", wiki: "Bombyliidae", bugguide: "1" },
+      { name: "Hover Fly", order: "Diptera", family: "Syrphidae", wiki: "Syrphidae", bugguide: "1" },
+      { name: "Fruit Fly", order: "Diptera", family: "Tephritidae", wiki: "Tephritidae", bugguide: "1" },
+      { name: "Pomace Fly", order: "Diptera", family: "Drosophilidae", wiki: "Drosophilidae", bugguide: "1" },
+      { name: "House Fly", order: "Diptera", family: "Muscidae", wiki: "Muscidae", bugguide: "1" },
+      { name: "Blow Fly", order: "Diptera", family: "Calliphoridae", wiki: "Calliphoridae", bugguide: "1" },
+      { name: "Tachinid Fly", order: "Diptera", family: "Tachinidae", wiki: "Tachinidae", bugguide: "1" },
+      { name: "Botfly", order: "Diptera", family: "Oestridae", wiki: "Oestridae", bugguide: "1" },
+      
+      // Trichoptera
+      { name: "Caddisfly", order: "Trichoptera", family: "Limnephilidae", wiki: "Limnephilidae", bugguide: "1" },
+      
+      // Lepidoptera
+      { name: "Brush-footed Butterfly", order: "Lepidoptera", family: "Nymphalidae", wiki: "Nymphalidae", bugguide: "1" },
+      { name: "Geometer Moth", order: "Lepidoptera", family: "Geometridae", wiki: "Geometridae", bugguide: "1" },
+      { name: "Tent Caterpillar Moth", order: "Lepidoptera", family: "Lasiocampidae", wiki: "Lasiocampidae", bugguide: "1" },
+      { name: "Snout Moth", order: "Lepidoptera", family: "Pyralidae", wiki: "Pyralidae", bugguide: "1" },
+      { name: "Giant Silkworm Moth", order: "Lepidoptera", family: "Saturniidae", wiki: "Saturniidae", bugguide: "1" },
+      { name: "Sphinx Moth", order: "Lepidoptera", family: "Sphingidae", wiki: "Sphingidae", bugguide: "1" },
+      { name: "Tiger Moth", order: "Lepidoptera", family: "Erebidae", wiki: "Erebidae", bugguide: "1" },
+      { name: "Owlet Moth", order: "Lepidoptera", family: "Noctuidae", wiki: "Noctuidae", bugguide: "1" },
+      { name: "Clearwing Moth", order: "Lepidoptera", family: "Sesiidae", wiki: "Sesiidae", bugguide: "1" },
+      { name: "Tortrix Moth", order: "Lepidoptera", family: "Tortricidae", wiki: "Tortricidae", bugguide: "1" },
+      { name: "Skipper", order: "Lepidoptera", family: "Hesperiidae", wiki: "Hesperiidae", bugguide: "1" },
+      { name: "Swallowtail", order: "Lepidoptera", family: "Papilionidae", wiki: "Papilionidae", bugguide: "1" },
+      { name: "White or Sulfur", order: "Lepidoptera", family: "Pieridae", wiki: "Pieridae", bugguide: "1" },
+      { name: "Hairstreak or Blue", order: "Lepidoptera", family: "Lycaenidae", wiki: "Lycaenidae", bugguide: "1" },
+      
+      // Hymenoptera
+      { name: "Common Sawfly", order: "Hymenoptera", family: "Tenthredinidae", wiki: "Tenthredinidae", bugguide: "1" },
+      { name: "Horntail", order: "Hymenoptera", family: "Siricidae", wiki: "Siricidae", bugguide: "1" },
+      { name: "Ichneumon", order: "Hymenoptera", family: "Ichneumonidae", wiki: "Ichneumonidae", bugguide: "1" },
+      { name: "Gall Wasp", order: "Hymenoptera", family: "Cynipidae", wiki: "Cynipidae", bugguide: "1" },
+      { name: "Velvet Ant", order: "Hymenoptera", family: "Mutillidae", wiki: "Mutillidae", bugguide: "1" },
+      { name: "Ant", order: "Hymenoptera", family: "Formicidae", wiki: "Formicidae", bugguide: "1" },
+      { name: "Paper Wasp", order: "Hymenoptera", family: "Vespidae", wiki: "Vespidae", bugguide: "1" },
+      { name: "Thread-waisted Wasp", order: "Hymenoptera", family: "Sphecidae", wiki: "Sphecidae", bugguide: "1" },
+      { name: "Braconid Wasp", order: "Hymenoptera", family: "Braconidae", wiki: "Braconidae", bugguide: "1" },
+      { name: "Sweat Bee", order: "Hymenoptera", family: "Halictidae", wiki: "Halictidae", bugguide: "1" },
+      { name: "Leaf Cutter Bee", order: "Hymenoptera", family: "Megachilidae", wiki: "Megachilidae", bugguide: "1" },
+      { name: "Honey Bee", order: "Hymenoptera", family: "Apidae", wiki: "Apidae", bugguide: "1" },
+    ];
+
+    // Group insects by order
+    const orderGroups = {};
+    insectData.forEach(insect => {
+      if (!orderGroups[insect.order]) {
+        orderGroups[insect.order] = [];
+      }
+      orderGroups[insect.order].push(insect);
+    });
+
+    function showOrders() {
+      document.getElementById('order-list').style.display = 'grid';
+      document.getElementById('family-grid').classList.remove('active');
+      document.getElementById('back-btn').classList.remove('active');
+      document.getElementById('order-title').classList.remove('active');
+      
+      const orderList = document.getElementById('order-list');
+      orderList.innerHTML = '';
+      
+      Object.keys(orderGroups).sort().forEach(order => {
+        const count = orderGroups[order].length;
+        const card = document.createElement('div');
+        card.className = 'order-card';
+        card.innerHTML = `
+          <h3>${order}</h3>
+          <div class="count">${count} ${count === 1 ? 'family' : 'families'}</div>
+        `;
+        card.onclick = () => showFamilies(order);
+        orderList.appendChild(card);
+      });
+    }
+
+    function showFamilies(order) {
+      document.getElementById('order-list').style.display = 'none';
+      document.getElementById('family-grid').classList.add('active');
+      document.getElementById('back-btn').classList.add('active');
+      document.getElementById('order-title').classList.add('active');
+      document.getElementById('order-title').textContent = order;
+      
+      const familyGrid = document.getElementById('family-grid');
+      familyGrid.innerHTML = '';
+      
+      orderGroups[order].forEach(async insect => {
+        const card = document.createElement('div');
+        card.className = 'family-card';
+        
+        const imagePath = `images/${insect.order}/${insect.family}/specimen.jpg`;
+        
+        card.innerHTML = `
+          <h4>${insect.family}</h4>
+          <div class="common-name">${insect.name}</div>
+          <div class="image-container" id="img-${insect.family}">
+            <div class="placeholder">Loading image...</div>
+          </div>
+          <div class="links">
+            <a href="https://en.wikipedia.org/wiki/${insect.wiki}" target="_blank">Wikipedia</a>
+            <a href="https://bugguide.net/node/view/${insect.bugguide}" target="_blank">BugGuide</a>
+          </div>
+        `;
+        
+        familyGrid.appendChild(card);
+        
+        // Try to load local image first, then fallback to Wikipedia
+        loadImage(insect, imagePath);
+      });
+    }
+    
+    async function loadImage(insect, localPath) {
+      const container = document.getElementById(`img-${insect.family}`);
+      
+      // Try local image first
+      const localImg = new Image();
+      localImg.onload = function() {
+        container.innerHTML = `<img src="${localPath}" alt="${insect.name}">`;
+      };
+      
+      localImg.onerror = async function() {
+        // Local image not found, try Wikipedia
+        try {
+          const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(insect.wiki)}`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const imgUrl = data.thumbnail?.source || data.originalimage?.source;
+          
+          if (imgUrl) {
+            container.innerHTML = `<img src="${imgUrl}" alt="${insect.name}">`;
+          } else {
+            container.innerHTML = `<div class="placeholder">No image available<br><small>Add to: ${localPath}</small></div>`;
+          }
+        } catch (error) {
+          container.innerHTML = `<div class="placeholder">Add image to:<br>${localPath}</div>`;
+        }
+      };
+      
+      localImg.src = localPath;
+    }
+
+    // Initialize
+    showOrders();
+  </script>
+</body>
+</html>
