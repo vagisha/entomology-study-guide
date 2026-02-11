@@ -346,6 +346,13 @@
     
     // Order descriptions and characteristics
     const orderInfo = {
+      "Acari": {
+        meaning: "Mite",
+        characteristics: "Non-insect arthropod, 8 legs",
+        wings: "None",
+        children: "Nymphs – like adults but smaller",
+        commonName: "Ticks & Mites (Non-insect Arthropod)"
+      },
       "Blattodea": {
         meaning: "Avoiding light",
         characteristics: "Head under thorax",
@@ -437,7 +444,7 @@
       ametabolous: {
         title: "Ametabolous (No Metamorphosis)",
         description: "Develop directly from egg to adult with no significant body changes",
-        orders: ["Protura", "Diplura", "Archaeognatha", "Zygentoma"]
+        orders: ["Acari", "Protura", "Diplura", "Archaeognatha", "Zygentoma"]
       },
       hemimetabolous: {
         title: "Hemimetabolous (Incomplete Metamorphosis)",
@@ -475,6 +482,9 @@
     };
     
     const insectData = [
+      // Acari (Non-insect Arthropod)
+      { name: "Hardback Tick", order: "Acari", family: "Ixodidae", wiki: "Ixodidae", bugguide: "1" },
+      
       // Protura
       { name: "Proturan", order: "Protura", family: "Protura", wiki: "Protura", bugguide: "1", optional: true },
       
@@ -516,14 +526,14 @@
       
       // Orthoptera
       { name: "Pygmy Grasshopper", order: "Orthoptera", family: "Tetrigidae", wiki: "Tetrigidae", bugguide: "1", optional: true },
-      { name: "Grasshopper", order: "Orthoptera", family: "Acrididae", wiki: "Acrididae", bugguide: "1" },
+      { name: "Short-horned Grasshopper", order: "Orthoptera", family: "Acrididae", wiki: "Acrididae", bugguide: "1" },
       { name: "Katydid", order: "Orthoptera", family: "Tettigoniidae", wiki: "Tettigoniidae", bugguide: "1" },
       { name: "Camel Cricket", order: "Orthoptera", family: "Rhaphidophoridae", wiki: "Rhaphidophoridae", bugguide: "1" },
       { name: "Cricket", order: "Orthoptera", family: "Gryllidae", wiki: "Gryllidae", bugguide: "1" },
       { name: "Mole Cricket", order: "Orthoptera", family: "Gryllotalpidae", wiki: "Gryllotalpidae", bugguide: "1" },
       
       // Phasmatodea
-      { name: "Walkingstick", order: "Phasmatodea", family: "Diapheromeridae", wiki: "Diapheromeridae", bugguide: "1" },
+      { name: "Common Walkingstick", order: "Phasmatodea", family: "Diapheromeridae", wiki: "Diapheromeridae", bugguide: "1" },
       
       // Psocodea
       { name: "Book/Bark Lice", order: "Psocodea", family: "Psocodea", wiki: "Psocodea", bugguide: "1" },
@@ -563,7 +573,7 @@
       { name: "Antlion", order: "Neuroptera", family: "Myrmeleontidae", wiki: "Myrmeleontidae", bugguide: "1" },
       
       // Coleoptera
-      { name: "Ground Beetle", order: "Coleoptera", family: "Carabidae", wiki: "Carabidae", bugguide: "180" },
+      { name: "Ground and Tiger Beetle", order: "Coleoptera", family: "Carabidae", wiki: "Carabidae", bugguide: "180" },
       { name: "Predaceous Diving Beetle", order: "Coleoptera", family: "Dytiscidae", wiki: "Dytiscidae", bugguide: "1" },
       { name: "Whirligig Beetle", order: "Coleoptera", family: "Gyrinidae", wiki: "Gyrinidae", bugguide: "1" },
       { name: "Water Scavenger Beetle", order: "Coleoptera", family: "Hydrophilidae", wiki: "Hydrophilidae", bugguide: "1" },
@@ -575,13 +585,13 @@
       { name: "Stag Beetle", order: "Coleoptera", family: "Lucanidae", wiki: "Lucanidae", bugguide: "1" },
       { name: "Bess Beetle", order: "Coleoptera", family: "Passalidae", wiki: "Passalidae", bugguide: "1" },
       { name: "Dung Beetle", order: "Coleoptera", family: "Scarabaeidae", wiki: "Scarabaeidae", bugguide: "187" },
-      { name: "Metallic Wood-boring Beetle", order: "Coleoptera", family: "Buprestidae", wiki: "Buprestidae", bugguide: "162" },
+      { name: "Metallic Wood-boring/Jewel Beetle", order: "Coleoptera", family: "Buprestidae", wiki: "Buprestidae", bugguide: "162" },
       { name: "Click Beetle", order: "Coleoptera", family: "Elateridae", wiki: "Elateridae", bugguide: "1", optional: true },
       { name: "Firefly", order: "Coleoptera", family: "Lampyridae", wiki: "Lampyridae", bugguide: "1", optional: true },
       { name: "Soldier Beetle", order: "Coleoptera", family: "Cantharidae", wiki: "Cantharidae", bugguide: "1" },
       { name: "Net-winged Beetle", order: "Coleoptera", family: "Lycidae", wiki: "Lycidae", bugguide: "1", optional: true },
       { name: "Checkered Beetle", order: "Coleoptera", family: "Cleridae", wiki: "Cleridae", bugguide: "1", optional: true },
-      { name: "Ladybug", order: "Coleoptera", family: "Coccinellidae", wiki: "Coccinellidae", bugguide: "179" },
+      { name: "Lady-bird Beetle (Ladybug)", order: "Coleoptera", family: "Coccinellidae", wiki: "Coccinellidae", bugguide: "179" },
       { name: "Darkling Beetle", order: "Coleoptera", family: "Tenebrionidae", wiki: "Tenebrionidae", bugguide: "1" },
       { name: "Blister Beetle", order: "Coleoptera", family: "Meloidae", wiki: "Meloidae", bugguide: "1" },
       { name: "Long-horned Beetle", order: "Coleoptera", family: "Cerambycidae", wiki: "Cerambycidae", bugguide: "1" },
@@ -594,7 +604,7 @@
       { name: "Common Scorpionfly", order: "Mecoptera", family: "Panorpidae", wiki: "Panorpidae", bugguide: "1", optional: true },
       
       // Raphidioptera
-      { name: "Snakefly", order: "Raphidioptera", family: "Raphidiidae", wiki: "Raphidiidae", bugguide: "1" },
+      { name: "Raphidiid Snakefly", order: "Raphidioptera", family: "Raphidiidae", wiki: "Raphidiidae", bugguide: "1" },
       
       // Siphonaptera
       { name: "Flea", order: "Siphonaptera", family: "Siphonaptera", wiki: "Siphonaptera", bugguide: "1" },
@@ -608,9 +618,9 @@
       { name: "Horse Fly", order: "Diptera", family: "Tabanidae", wiki: "Tabanidae", bugguide: "1" },
       { name: "Robber Fly", order: "Diptera", family: "Asilidae", wiki: "Asilidae", bugguide: "1" },
       { name: "Bee Fly", order: "Diptera", family: "Bombyliidae", wiki: "Bombyliidae", bugguide: "1" },
-      { name: "Hover Fly", order: "Diptera", family: "Syrphidae", wiki: "Syrphidae", bugguide: "1" },
-      { name: "Fruit Fly", order: "Diptera", family: "Tephritidae", wiki: "Tephritidae", bugguide: "1", optional: true },
-      { name: "Pomace Fly, Fruit / Vinegar Fly", order: "Diptera", family: "Drosophilidae", wiki: "Drosophilidae", bugguide: "1" },
+      { name: "Hover/Flower Fly", order: "Diptera", family: "Syrphidae", wiki: "Syrphidae", bugguide: "1" },
+      { name: "Fruit Fly, Husk Fly", order: "Diptera", family: "Tephritidae", wiki: "Tephritidae", bugguide: "1", optional: true },
+      { name: "Pomace Fly, Fruit/Vinegar Fly", order: "Diptera", family: "Drosophilidae", wiki: "Drosophilidae", bugguide: "1" },
       { name: "House Fly", order: "Diptera", family: "Muscidae", wiki: "Muscidae", bugguide: "1" },
       { name: "Blow Fly", order: "Diptera", family: "Calliphoridae", wiki: "Calliphoridae", bugguide: "1" },
       { name: "Tachinid Fly", order: "Diptera", family: "Tachinidae", wiki: "Tachinidae", bugguide: "1", optional: true },
@@ -622,7 +632,7 @@
       // Lepidoptera
       { name: "Brush-footed Butterfly", order: "Lepidoptera", family: "Nymphalidae", wiki: "Nymphalidae", bugguide: "1" },
       { name: "Geometer Moth", order: "Lepidoptera", family: "Geometridae", wiki: "Geometridae", bugguide: "1" },
-      { name: "Tent Caterpillar Moth", order: "Lepidoptera", family: "Lasiocampidae", wiki: "Lasiocampidae", bugguide: "1", optional: true },
+      { name: "Tent Caterpillar/Lappet Moth", order: "Lepidoptera", family: "Lasiocampidae", wiki: "Lasiocampidae", bugguide: "1", optional: true },
       { name: "Snout Moth", order: "Lepidoptera", family: "Pyralidae", wiki: "Pyralidae", bugguide: "1", optional: true },
       { name: "Giant Silkworm Moth", order: "Lepidoptera", family: "Saturniidae", wiki: "Saturniidae", bugguide: "1" },
       { name: "Sphinx Moth", order: "Lepidoptera", family: "Sphingidae", wiki: "Sphingidae", bugguide: "1" },
@@ -809,7 +819,10 @@
         
         // Determine NC State link based on order
         let ncStateLink;
-        if (insect.order === 'Protura') {
+        if (insect.order === 'Acari') {
+          // No NC State link for non-insect arthropods
+          ncStateLink = null;
+        } else if (insect.order === 'Protura') {
           ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/class-protura/';
         } else if (insect.order === 'Diplura') {
           ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/class-diplura/';
