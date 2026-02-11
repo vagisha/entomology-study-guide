@@ -199,6 +199,82 @@
       color: #eee;
     }
     
+    .notes-section {
+      background: #2a2a3e;
+      border: 2px solid #667eea;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+    }
+    
+    .notes-section h4 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 1em;
+    }
+    
+    .notes-section textarea {
+      width: 100%;
+      min-height: 80px;
+      background: #1a1a2e;
+      color: #eee;
+      border: 1px solid #444;
+      border-radius: 6px;
+      padding: 10px;
+      font-family: inherit;
+      font-size: 0.9em;
+      resize: vertical;
+    }
+    
+    .notes-section textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+    
+    .notes-section button {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 8px;
+      font-size: 0.9em;
+    }
+    
+    .notes-section button:hover {
+      background: #5568d3;
+    }
+    
+    .notes-display {
+      background: #1a1a2e;
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 8px;
+      white-space: pre-wrap;
+      line-height: 1.5;
+    }
+    
+    .notes-display.empty {
+      color: #666;
+      font-style: italic;
+    }
+    
+    .add-note-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85em;
+      margin-top: 10px;
+    }
+    
+    .add-note-btn:hover {
+      background: #5568d3;
+    }
+    
     .order-links {
       display: flex;
       gap: 10px;
@@ -235,6 +311,22 @@
   </div>
 
   <script>
+    // Notes management using localStorage
+    const NotesManager = {
+      getOrderNote: function(order) {
+        return localStorage.getItem(`note-order-${order}`) || '';
+      },
+      setOrderNote: function(order, note) {
+        localStorage.setItem(`note-order-${order}`, note);
+      },
+      getFamilyNote: function(family) {
+        return localStorage.getItem(`note-family-${family}`) || '';
+      },
+      setFamilyNote: function(family, note) {
+        localStorage.setItem(`note-family-${family}`, note);
+      }
+    };
+    
     // Order descriptions and characteristics
     const orderInfo = {
       "Blattodea": {
@@ -597,6 +689,7 @@
         <span>${order}</span>
         <div class="order-links">
           <a href="https://en.wikipedia.org/wiki/${order}" target="_blank">Wikipedia</a>
+          <a href="https://genent.cals.ncsu.edu/insect-identification/order-${order.toLowerCase()}/" target="_blank">NC State</a>
           ${bugguideButton}
         </div>
       `;
@@ -629,6 +722,17 @@
         infoBox.classList.remove('active');
       }
       
+      // Add order notes section
+      const orderNote = NotesManager.getOrderNote(order);
+      const notesSection = document.createElement('div');
+      notesSection.className = 'notes-section';
+      notesSection.innerHTML = `
+        <h4>📝 My Notes for ${order}</h4>
+        <textarea id="order-note-input" placeholder="Add your study notes here...">${orderNote}</textarea>
+        <button onclick="saveOrderNote('${order}')">Save Note</button>
+      `;
+      infoBox.appendChild(notesSection);
+      
       const familyGrid = document.getElementById('family-grid');
       familyGrid.innerHTML = '';
       
@@ -645,6 +749,9 @@
           ? `<a href="${familyLink}" target="_blank">BugGuide</a>`
           : '';
         
+        const familyNote = NotesManager.getFamilyNote(insect.family);
+        const notePreview = familyNote ? `<div class="notes-display">${familyNote.substring(0, 100)}${familyNote.length > 100 ? '...' : ''}</div>` : '';
+        
         card.innerHTML = `
           <h4>${insect.family}</h4>
           <div class="common-name">${insect.name}</div>
@@ -653,8 +760,13 @@
           </div>
           <div class="links">
             <a href="https://en.wikipedia.org/wiki/${insect.wiki}" target="_blank">Wikipedia</a>
+            <a href="https://genent.cals.ncsu.edu/insect-identification/order-${insect.order.toLowerCase()}/family-${insect.family.toLowerCase()}/" target="_blank">NC State</a>
             ${bugguideButton}
           </div>
+          ${notePreview}
+          <button class="add-note-btn" onclick="editFamilyNote('${insect.family}', '${insect.name}')">
+            ${familyNote ? '✏️ Edit Note' : '📝 Add Note'}
+          </button>
         `;
         
         familyGrid.appendChild(card);
@@ -694,6 +806,37 @@
       
       // Set src to trigger load attempt
       localImg.src = localPath;
+    }
+
+    // Save order note
+    function saveOrderNote(order) {
+      const noteInput = document.getElementById('order-note-input');
+      NotesManager.setOrderNote(order, noteInput.value);
+      alert('Note saved! Your notes are stored locally in your browser.');
+    }
+    
+    // Edit family note
+    function editFamilyNote(family, commonName) {
+      const currentNote = NotesManager.getFamilyNote(family);
+      const newNote = prompt(`Add/Edit notes for ${family} (${commonName}):`, currentNote);
+      if (newNote !== null) {
+        NotesManager.setFamilyNote(family, newNote);
+        // Refresh the current view to show updated note
+        const currentOrder = [...document.querySelectorAll('.order-card')].find(card => 
+          orderGroups[card.querySelector('h3').textContent]?.some(i => i.family === family)
+        );
+        if (currentOrder) {
+          showFamilies(currentOrder.querySelector('h3').textContent);
+        } else {
+          // Find which order this family belongs to
+          for (const [order, insects] of Object.entries(orderGroups)) {
+            if (insects.some(i => i.family === family)) {
+              showFamilies(order);
+              break;
+            }
+          }
+        }
+      }
     }
 
     // Initialize
