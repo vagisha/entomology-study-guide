@@ -1360,13 +1360,28 @@
           doc.setTextColor(100, 100, 100);
           const cleanNote = String(familyNote).replace(/[^\x00-\x7F]/g, '');
           const noteLines = doc.splitTextToSize(cleanNote, cellWidth - 10);
-          // Only show first few lines to fit in cell
-          const maxNoteLines = 3;
-          const displayLines = noteLines.slice(0, maxNoteLines);
-          doc.text(displayLines, cellX + 5, cellYPos);
-          if (noteLines.length > maxNoteLines) {
-            cellYPos += (maxNoteLines * 4);
-            doc.text('...', cellX + 5, cellYPos);
+          
+          // Check if notes will fit in current cell
+          const notesHeight = noteLines.length * 4;
+          const remainingSpace = cellHeight - (cellYPos - cellY);
+          
+          if (notesHeight > remainingSpace) {
+            // Notes don't fit, continue on next page
+            doc.addPage();
+            let newYPos = margin;
+            
+            // Repeat family header on new page
+            doc.setFontSize(11);
+            doc.setTextColor(64, 145, 108);
+            doc.text(familyName + ' (continued)', margin, newYPos);
+            newYPos += 8;
+            
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text(noteLines, margin, newYPos);
+          } else {
+            // Notes fit in current cell
+            doc.text(noteLines, cellX + 5, cellYPos);
           }
         } else {
           // Add "Notes:" label with space for handwritten notes (larger font)
