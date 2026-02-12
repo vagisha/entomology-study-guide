@@ -292,6 +292,77 @@
       background: #52b788;
     }
     
+    /* Modal styles for notes */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-content {
+      background: #2c3e50;
+      border: 2px solid #74c69d;
+      border-radius: 12px;
+      padding: 25px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    
+    .modal-content h3 {
+      color: #74c69d;
+      margin-bottom: 15px;
+    }
+    
+    .modal-content textarea {
+      width: 100%;
+      min-height: 200px;
+      background: #34495e;
+      color: #eee;
+      border: 1px solid #5d6d7e;
+      border-radius: 6px;
+      padding: 10px;
+      font-family: system-ui, sans-serif;
+      font-size: 14px;
+      resize: vertical;
+    }
+    
+    .modal-content textarea:focus {
+      outline: none;
+      border-color: #74c69d;
+    }
+    
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+      justify-content: flex-end;
+    }
+    
+    .modal-buttons button {
+      padding: 10px 20px;
+    }
+    
+    .modal-buttons .cancel-btn {
+      background: #5d6d7e;
+    }
+    
+    .modal-buttons .cancel-btn:hover {
+      background: #6d7d8e;
+    }
+    
     .order-links {
       display: flex;
       gap: 10px;
@@ -316,6 +387,8 @@
       <a href="index.html">Flashcards</a>
       <a href="browse.html">Browse Insects</a>
       <a href="#" onclick="exportNotes(); return false;">💾 Export Notes</a>
+      <a href="#" onclick="document.getElementById('import-file').click(); return false;">📥 Import Notes</a>
+      <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importNotes(event)">
     </div>
   </div>
 
@@ -326,6 +399,18 @@
     
     <div class="order-list" id="order-list"></div>
     <div class="family-grid" id="family-grid"></div>
+  </div>
+  
+  <!-- Modal for editing notes -->
+  <div class="modal" id="note-modal">
+    <div class="modal-content">
+      <h3 id="modal-title">Edit Note</h3>
+      <textarea id="modal-textarea" placeholder="Enter your notes here..."></textarea>
+      <div class="modal-buttons">
+        <button class="cancel-btn" onclick="closeNoteModal()">Cancel</button>
+        <button onclick="saveNoteFromModal()">Save Note</button>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -898,7 +983,7 @@
           : '';
         
         const familyNote = NotesManager.getFamilyNote(insect.family);
-        const notePreview = familyNote ? `<div class="notes-display">${familyNote.substring(0, 100)}${familyNote.length > 100 ? '...' : ''}</div>` : '';
+        const notePreview = familyNote ? `<div class="notes-display">${familyNote.substring(0, 500)}${familyNote.length > 500 ? '...' : ''}</div>` : '';
         
         card.innerHTML = `
           <h4>${insect.family}</h4>
@@ -964,28 +1049,52 @@
     }
     
     // Edit family note
+    let currentEditFamily = null;
+    let currentEditFamilyName = null;
+    
     function editFamilyNote(family, commonName) {
+      currentEditFamily = family;
+      currentEditFamilyName = commonName;
+      
       const currentNote = NotesManager.getFamilyNote(family);
-      const newNote = prompt(`Add/Edit notes for ${family} (${commonName}):`, currentNote);
-      if (newNote !== null) {
-        NotesManager.setFamilyNote(family, newNote);
-        // Refresh the current view to show updated note
-        const currentOrder = [...document.querySelectorAll('.order-card')].find(card => 
-          orderGroups[card.querySelector('h3').textContent]?.some(i => i.family === family)
-        );
-        if (currentOrder) {
-          showFamilies(currentOrder.querySelector('h3').textContent);
-        } else {
-          // Find which order this family belongs to
-          for (const [order, insects] of Object.entries(orderGroups)) {
-            if (insects.some(i => i.family === family)) {
-              showFamilies(order);
-              break;
-            }
+      document.getElementById('modal-title').textContent = `Notes for ${family} (${commonName})`;
+      document.getElementById('modal-textarea').value = currentNote;
+      document.getElementById('note-modal').classList.add('active');
+    }
+    
+    function closeNoteModal() {
+      document.getElementById('note-modal').classList.remove('active');
+      currentEditFamily = null;
+      currentEditFamilyName = null;
+    }
+    
+    function saveNoteFromModal() {
+      if (!currentEditFamily) return;
+      
+      const noteText = document.getElementById('modal-textarea').value;
+      NotesManager.setFamilyNote(currentEditFamily, noteText);
+      
+      const familyToRefresh = currentEditFamily;
+      closeNoteModal();
+      
+      // Small delay to ensure modal closes, then refresh
+      setTimeout(() => {
+        // Find which order this family belongs to and refresh
+        for (const [order, insects] of Object.entries(orderGroups)) {
+          if (insects.some(i => i.family === familyToRefresh)) {
+            showFamilies(order);
+            break;
           }
         }
-      }
+      }, 100);
     }
+    
+    // Close modal when clicking outside
+    document.getElementById('note-modal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeNoteModal();
+      }
+    });
     
     // Export all notes to JSON file
     function exportNotes() {
@@ -1030,6 +1139,79 @@
       URL.revokeObjectURL(url);
       
       alert(`Exported ${Object.keys(notes.orderNotes).length} order notes and ${Object.keys(notes.familyNotes).length} family notes!`);
+    }
+    
+    // Import notes from JSON file (merge with existing)
+    function importNotes(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const importedData = JSON.parse(e.target.result);
+          
+          let orderCount = 0;
+          let familyCount = 0;
+          
+          // Merge order notes
+          if (importedData.orderNotes) {
+            Object.entries(importedData.orderNotes).forEach(([order, note]) => {
+              const existingNote = NotesManager.getOrderNote(order);
+              if (existingNote && existingNote.trim()) {
+                // Merge: append new note to existing with separator
+                NotesManager.setOrderNote(order, existingNote + '\n\n--- Imported ---\n' + note);
+              } else {
+                // No existing note, just set the imported one
+                NotesManager.setOrderNote(order, note);
+              }
+              orderCount++;
+            });
+          }
+          
+          // Merge family notes
+          if (importedData.familyNotes) {
+            Object.entries(importedData.familyNotes).forEach(([family, note]) => {
+              const existingNote = NotesManager.getFamilyNote(family);
+              if (existingNote && existingNote.trim()) {
+                // Merge: append new note to existing with separator
+                NotesManager.setFamilyNote(family, existingNote + '\n\n--- Imported ---\n' + note);
+              } else {
+                // No existing note, just set the imported one
+                NotesManager.setFamilyNote(family, note);
+              }
+              familyCount++;
+            });
+          }
+          
+          alert(`Successfully imported and merged ${orderCount} order notes and ${familyCount} family notes!`);
+          
+          // Reset file input
+          event.target.value = '';
+          
+          // Refresh the current view to show imported notes
+          const familyGrid = document.getElementById('family-grid');
+          const orderList = document.getElementById('order-list');
+          
+          if (familyGrid.classList.contains('active')) {
+            // We're viewing a specific order, refresh it
+            const orderTitle = document.getElementById('order-title').querySelector('span');
+            if (orderTitle) {
+              const currentOrder = orderTitle.textContent;
+              showFamilies(currentOrder);
+            }
+          } else if (orderList.style.display !== 'none') {
+            // We're viewing the order list, refresh it
+            showOrders();
+          }
+          
+        } catch (error) {
+          alert('Error importing notes: Invalid JSON file format');
+          console.error(error);
+        }
+      };
+      
+      reader.readAsText(file);
     }
     
     // Export order to PDF with images and notes
