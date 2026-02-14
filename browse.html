@@ -117,6 +117,17 @@
       margin-bottom: 10px;
     }
     
+    .family-card .marks {
+      color: #c0c0c0;
+      font-size: 0.85em;
+      line-height: 1.4;
+      margin-bottom: 10px;
+      padding: 8px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 6px;
+      font-style: italic;
+    }
+    
     .image-container {
       width: 100%;
       height: 200px;
@@ -413,6 +424,7 @@
     </div>
   </div>
 
+  <script src="shared.js"></script>
   <script>
     // Notes management using localStorage
     const NotesManager = {
@@ -567,7 +579,21 @@
       }
     };
     
-    const insectData = [
+    let insectData = [];
+
+    // Load insects data and initialize
+    async function initBrowse() {
+      try {
+        insectData = await loadInsectsData();
+        groupInsectsByOrder();
+        showOrders();
+      } catch (error) {
+        console.error('Error initializing browse:', error);
+      }
+    }
+
+    // OLD DATA BELOW - TO BE REMOVED
+    /*
       // Acari (Non-insect Arthropod)
       { name: "Hardback Tick", order: "Acari", family: "Ixodidae", wiki: "Ixodidae", bugguide: "1" },
       
@@ -744,16 +770,21 @@
       { name: "Sweat Bee", order: "Hymenoptera", family: "Halictidae", wiki: "Halictidae", bugguide: "1" },
       { name: "Leaf Cutter Bee", order: "Hymenoptera", family: "Megachilidae", wiki: "Megachilidae", bugguide: "1" },
       { name: "Honey Bee", order: "Hymenoptera", family: "Apidae", wiki: "Apidae", bugguide: "1" },
-    ];
+    */
+    // END OLD DATA - Now loaded from insects-data.json
 
-    // Group insects by order
-    const orderGroups = {};
-    insectData.forEach(insect => {
-      if (!orderGroups[insect.order]) {
-        orderGroups[insect.order] = [];
-      }
-      orderGroups[insect.order].push(insect);
-    });
+    // Group insects by order (will be populated after data loads)
+    let orderGroups = {};
+
+    function groupInsectsByOrder() {
+      orderGroups = {};
+      insectData.forEach(insect => {
+        if (!orderGroups[insect.order]) {
+          orderGroups[insect.order] = [];
+        }
+        orderGroups[insect.order].push(insect);
+      });
+    }
 
     function showOrders() {
       document.getElementById('order-list').style.display = 'block';
@@ -904,79 +935,8 @@
           ? `<a href="${familyLink}" target="_blank">BugGuide</a>`
           : '';
         
-        // Determine NC State link based on order
-        let ncStateLink;
-        if (insect.order === 'Acari') {
-          // No NC State link for non-insect arthropods
-          ncStateLink = null;
-        } else if (insect.order === 'Protura') {
-          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/class-protura/';
-        } else if (insect.order === 'Diplura') {
-          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/class-diplura/';
-        } else if (insect.order === 'Archaeognatha') {
-          ncStateLink = 'https://genent.cals.ncsu.edu/bug-bytes/apterygota/';
-        } else if (insect.order === 'Blattodea' && insect.family === 'Blattidae') {
-          // NC State only has info for Blattidae
-          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/order-blattodea/';
-        } else if (insect.order === 'Blattodea') {
-          // No NC State link for Termitidae and Cryptocercidae
-          ncStateLink = null;
-        } else if (insect.order === 'Megaloptera') {
-          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/megaloptera/';
-        } else if (insect.order === 'Neuroptera' && insect.family === 'Myrmeleontidae') {
-          // Special case: Myrmeleontidae is under megaloptera URL
-          ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/megaloptera/family-myrmeleontidae/';
-        } else if (insect.order === 'Hemiptera') {
-          // Hemiptera families need suborder in the URL
-          const hemipteraSuborders = {
-            // Heteroptera (true bugs)
-            'Gelastocoridae': 'heteroptera',
-            'Gerridae': 'heteroptera',
-            'Cimicidae': 'heteroptera',
-            'Miridae': 'heteroptera',
-            'Reduviidae': 'heteroptera',
-            'Scutelleridae': 'heteroptera',
-            'Tingidae': 'heteroptera',
-            'Lygaeidae': 'heteroptera',
-            'Coreidae': 'heteroptera',
-            'Pentatomidae': 'heteroptera',
-            'Corixidae': 'heteroptera',
-            'Notonectidae': 'heteroptera',
-            'Belostomatidae': 'heteroptera',
-            'Nepidae': 'heteroptera',
-            // Homoptera (cicadas, hoppers, aphids, scales)
-            'Cicadidae': 'homoptera',
-            'Membracidae': 'homoptera',
-            'Cercopidae': 'homoptera',
-            'Cicadellidae': 'homoptera',
-            'Aphididae': 'homoptera',
-            'Pseudococcidae': 'homoptera',
-            'Coccidae': 'homoptera'
-          };
-          
-          // Special case URLs for some families
-          if (insect.family === 'Aphididae') {
-            ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/order-hemiptera-suborder-homoptera/family-aphidoidea/';
-          } else if (insect.family === 'Coccidae') {
-            ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/order-hemiptera-suborder-homoptera/family-coccoidea/';
-          } else if (insect.family === 'Reduviidae') {
-            ncStateLink = 'https://genent.cals.ncsu.edu/insect-identification/order-hemiptera-suborder-heteroptera/family-reduviidae-2/';
-          } else if (insect.family === 'Fulgoridae') {
-            // No NC State link for Fulgoridae
-            ncStateLink = null;
-          } else {
-            const suborder = hemipteraSuborders[insect.family];
-            if (suborder) {
-              ncStateLink = `https://genent.cals.ncsu.edu/insect-identification/order-hemiptera-suborder-${suborder}/family-${insect.family.toLowerCase()}/`;
-            } else {
-              ncStateLink = null;
-            }
-          }
-        } else if (orderGroups[insect.order].length > 1) {
-          ncStateLink = `https://genent.cals.ncsu.edu/insect-identification/order-${insect.order.toLowerCase()}/family-${insect.family.toLowerCase()}/`;
-        } else {
-          ncStateLink = `https://genent.cals.ncsu.edu/insect-identification/order-${insect.order.toLowerCase()}/`;
-        }
+        // Use shared NC State link function
+        const ncStateLink = getNcStateUrl(insect);
         
         const ncStateButton = ncStateLink 
           ? `<a href="${ncStateLink}" target="_blank">NC State</a>`
@@ -988,6 +948,7 @@
         card.innerHTML = `
           <h4>${insect.family}</h4>
           <div class="common-name">${insect.name}</div>
+          <div class="marks">${insect.marks}</div>
           <div class="image-container" id="img-${insect.family}">
             <div class="placeholder">Loading image...</div>
           </div>
@@ -1012,33 +973,14 @@
     async function loadImage(insect, localPath) {
       const container = document.getElementById(`img-${insect.family}`);
       
-      // Try local image first (silently)
-      const localImg = new Image();
+      // Use shared image fetching function
+      const imgUrl = await fetchInsectImage(insect);
       
-      localImg.onload = function() {
-        container.innerHTML = `<img src="${localPath}" alt="${insect.name}">`;
-      };
-      
-      localImg.onerror = async function() {
-        // Local image not found (expected), try Wikipedia
-        try {
-          const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(insect.wiki)}`;
-          const res = await fetch(url);
-          const data = await res.json();
-          const imgUrl = data.thumbnail?.source || data.originalimage?.source;
-          
-          if (imgUrl) {
-            container.innerHTML = `<img src="${imgUrl}" alt="${insect.name}">`;
-          } else {
-            container.innerHTML = `<div class="placeholder">No image available<br><small>Add to: ${localPath}</small></div>`;
-          }
-        } catch (error) {
-          container.innerHTML = `<div class="placeholder">Add image to:<br>${localPath}</div>`;
-        }
-      };
-      
-      // Set src to trigger load attempt
-      localImg.src = localPath;
+      if (imgUrl) {
+        container.innerHTML = `<img src="${imgUrl}" alt="${insect.name}">`;
+      } else {
+        container.innerHTML = `<div class="placeholder">No image available<br><small>Add to: ${localPath}</small></div>`;
+      }
     }
 
     // Save order note
@@ -1423,8 +1365,8 @@
       });
     }
 
-    // Initialize
-    showOrders();
+    // Load data and initialize
+    initBrowse();
   </script>
 </body>
 </html>

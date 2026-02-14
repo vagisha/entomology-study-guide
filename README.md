@@ -1,92 +1,70 @@
 # Entomology Study Guide - Science Olympiad 2026
 
-A comprehensive web-based study tool for the Science Olympiad 2026 Entomology event. Features flashcards, browseable insect families, and PDF export capabilities.
+Interactive flashcards and browse interface for studying insects for Science Olympiad 2026.
 
 ## Features
 
-### 📚 Flashcard Mode (`index.html`)
-- Interactive flashcards for all 113 insect families across 26 orders
-- 169 total specimens for comprehensive study
-- Click to flip between image and detailed information
-- Filter to include/exclude State/National level (optional) families
-- Previous/Next navigation and shuffle functionality
-- Shows family name, common name, order, and distinguishing marks
-- Links to Wikipedia and NC State resources
+- **Flashcards** (`index.html`): Interactive flashcards with images, distinguishing marks, and optional family filtering
+- **Browse** (`browse.html`): Browse insects by order with notes, PDF export, and detailed information
+- **Shared Data**: All insect metadata stored in `insects-data.json` for easy maintenance
+- **Shared Code**: Common functionality in `shared.js` (data loading, image fetching, URL generation)
 
-### 🔍 Browse Mode (`browse.html`)
-- Organized by metamorphosis type (Ametabolous, Hemimetabolous, Holometabolous)
-- View all families within each order
-- Order characteristics and information
-- Add and save personal notes for orders and families (stored in browser localStorage)
-- Export notes as JSON
-- **PDF Export**: Generate study guides with 2x2 grid layout, images, and space for notes
-- Links to Wikipedia, NC State, and BugGuide resources
-- Local image support with Wikipedia API fallback
-
-### 🎨 Features
-- Optional families marked with orange dashed borders
-- No server required - runs entirely in the browser
-- Notes persist across sessions using localStorage
-
-## Getting Started
-Simply open `index.html` or `browse.html` in your web browser. No installation required!
-
+## File Structure
 
 ```
+├── index.html              # Flashcard interface
+├── browse.html             # Browse interface
+├── insects-data.json       # Insect metadata (123 families, 27 optional)
+├── shared.js               # Shared JavaScript functions
+├── images/                 # Local specimen images (Order/Family/specimen.jpg)
+└── README.md               # This file
+```
 
-## Science Olympiad 2026 Coverage
+## Data Structure
 
-### Orders Covered (26 total)
-- **Ametabolous**: Acari (non-insect), Protura, Diplura, Archaeognatha, Zygentoma
-- **Hemimetabolous**: Ephemeroptera, Odonata, Blattodea, Mantodea, Embioptera, Dermaptera, Plecoptera, Orthoptera, Phasmatodea, Psocodea, Hemiptera, Thysanoptera
-- **Holometabolous**: Megaloptera, Neuroptera, Coleoptera, Mecoptera, Raphidioptera, Siphonaptera, Diptera, Trichoptera, Lepidoptera, Hymenoptera
-
-### Families Covered
-- 113 insect families
+The `insects-data.json` file contains 123 families from 26 orders, including:
 - 27 optional families (State/National level only)
-- 86 required families (Regional/Invitational level)
+- Common names, scientific names, distinguishing marks
+- Wikipedia and BugGuide reference IDs
 
-## Notes Feature
+## Local Development
 
-- **Order Notes**: Add study notes for entire orders
-- **Family Notes**: Add specific notes for individual families
-- **Export**: Download all notes as JSON for backup
-- **Persistence**: Notes are saved in browser localStorage
+**You must run a local web server** (browsers block fetch() from file:// URLs):
 
-## PDF Export
+**Option 1: Python**
+```bash
+python -m http.server 8000
+```
 
-Generate printable study guides:
-- 2x2 grid layout (4 families per page)
-- Includes images and family information
-- Space for handwritten notes
-- Excludes optional families
-- Perfect for offline study
+**Option 2: Node.js**
+```bash
+npx http-server -p 8000
+```
 
-## Technologies Used
+**Option 3: VS Code Live Server**
+- Install "Live Server" extension
+- Right-click `index.html` → "Open with Live Server"
 
-- Pure HTML/CSS/JavaScript (no frameworks)
-- [jsPDF](https://github.com/parallax/jsPDF) for PDF generation
-- Wikipedia API for fallback images
-- localStorage for note persistence
+Then open `http://localhost:8000/index.html` or `http://localhost:8000/browse.html`
 
-## Browser Compatibility
+## GitHub Pages Deployment
 
-Works in all modern browsers:
-- Chrome/Edge
-- Firefox
-- Safari
+1. Push to GitHub
+2. Enable GitHub Pages in repository settings
+3. Select branch and root folder
+4. Access at `https://[username].github.io/[repo-name]/`
 
-## License
+## Notes
 
-This is an educational tool created for Science Olympiad preparation. All insect information should be verified against official Science Olympiad rules and resources.
+- Notes are stored in browser localStorage
+- Export/import notes as JSON
+- PDF export excludes optional families
+- Images loaded from local `images/` folder or Wikipedia API fallback
 
-## Resources
+## Shared Functions (shared.js)
 
-- [NC State Insect Identification](https://genent.cals.ncsu.edu/insect-identification/)
-- [BugGuide](https://bugguide.net/)
-- [Wikipedia](https://en.wikipedia.org/)
-- [Science Olympiad Official Rules](https://www.soinc.org/)
-
-## Acknowledgments
-
-Created for Science Olympiad 2026 Entomology event preparation.
+- `loadInsectsData()` - Loads insects-data.json
+- `fetchInsectImage(insect)` - Fetches image with local/Wikipedia fallback
+- `getNcStateUrl(insect)` - Generates NC State Entomology URL
+- `getBugGuideUrl(insect)` - Generates BugGuide URL
+- `getWikipediaUrl(insect)` - Generates Wikipedia URL

@@ -82,8 +82,28 @@
   </div>
   <div class="progress" id="progress"></div>
 
+  <script src="shared.js"></script>
   <script>
-    const insects = [
+    let insects = [];
+
+    // Load insects data and initialize
+    async function initFlashcards() {
+      try {
+        insects = await loadInsectsData();
+        buildDeck();
+        showCard();
+      } catch (error) {
+        console.error('Error initializing flashcards:', error);
+        document.getElementById('insect-name').textContent = 'Error loading data';
+      }
+    }
+    let deck = [], currentIndex = 0;
+
+    function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
+    function flipCard() { document.querySelector('.card').classList.toggle('flipped'); }
+
+    // OLD DATA BELOW - TO BE REMOVED
+    /*
       // Protura (OPTIONAL - State/National only)
       { name: "Proturan", order: "Protura", family: "Protura", wiki: "Protura", marks: "Tiny, no antennae, no eyes, soil-dwelling", optional: true },
       
@@ -309,48 +329,10 @@
       { name: "Thrips", wiki: "Thripidae", order: "Thysanoptera", family: "Thripidae", marks: "Tiny, fringed wings, rasping mouthparts" },
       { name: "Caddisfly", wiki: "Limnephilidae", order: "Trichoptera", family: "Limnephilidae", marks: "Hairy wings, moth-like, larvae build cases" },
       { name: "Hardback Tick", wiki: "Ixodidae", order: "Acari", family: "Ixodidae", marks: "Hard dorsal shield, blood feeders, disease vectors" },
-    ];
+    */
+    // END OLD DATA - Now loaded from insects-data.json
 
-    const imageCache = {};
-
-    let deck = [], currentIndex = 0;
-
-    function shuffle(arr) { for (let i = arr.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; } }
-    function flipCard() { document.querySelector('.card').classList.toggle('flipped'); }
-
-    async function fetchImage(insect) {
-      const localPath = `images/${insect.order}/${insect.family}/specimen.jpg`;
-      
-      // Try local image first
-      return new Promise((resolve) => {
-        const localImg = new Image();
-        
-        localImg.onload = function() {
-          resolve(localPath);
-        };
-        
-        localImg.onerror = async function() {
-          // Local image not found, try Wikipedia
-          if (imageCache[insect.wiki]) {
-            resolve(imageCache[insect.wiki]);
-            return;
-          }
-          
-          try {
-            const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(insect.wiki)}`;
-            const res = await fetch(url);
-            const data = await res.json();
-            const imgUrl = data.thumbnail?.source || '';
-            imageCache[insect.wiki] = imgUrl;
-            resolve(imgUrl);
-          } catch {
-            resolve('');
-          }
-        };
-        
-        localImg.src = localPath;
-      });
-    }
+    // Use shared fetchInsectImage function from shared.js
 
     function buildDeck() {
       deck = [];
@@ -408,7 +390,7 @@
       document.getElementById('progress').textContent = `Card ${currentIndex + 1} of ${deck.length}`;
       document.querySelector('.card').classList.remove('flipped');
 
-      const imgUrl = await fetchImage(insect);
+      const imgUrl = await fetchInsectImage(insect);
       const imgHtml = imgUrl ? `<img src="${imgUrl}" alt="${insect.name}">` : 'No image';
       document.getElementById('front-img').innerHTML = imgHtml;
       document.getElementById('back-img').innerHTML = imgHtml;
@@ -418,8 +400,8 @@
     function prevCard() { currentIndex = (currentIndex - 1 + deck.length) % deck.length; showCard(); }
     function shuffleCards() { buildDeck(); currentIndex = 0; showCard(); }
 
-    buildDeck();
-    showCard();
+    // Initialize by loading data
+    initFlashcards();
   </script>
 </body>
 </html>
