@@ -16,6 +16,7 @@ Interactive flashcards and browse interface for studying insects for Science Oly
 ├── browse.html             # Browse interface
 ├── insects-data.json       # Insect metadata (123 families, 27 optional)
 ├── shared.js               # Shared JavaScript functions
+├── shared.css              # Shared CSS styles
 ├── images/                 # Local specimen images (Order/Family/specimen.jpg)
 └── README.md               # This file
 ```

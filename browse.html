@@ -5,20 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Browse Insects - Entomology Study Guide</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <link rel="stylesheet" href="shared.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      font-family: system-ui, sans-serif; 
-      background: #2c3e50; 
-      color: #eee; 
-      min-height: 100vh; 
-      padding: 20px; 
-    }
+    /* Browse-specific styles */
     .header {
       text-align: center;
       margin-bottom: 30px;
     }
-    h1 { color: #74c69d; margin-bottom: 10px; }
     .nav-links {
       display: flex;
       gap: 15px;
@@ -138,6 +131,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      position: relative;
     }
     
     .image-container img {
@@ -152,24 +146,65 @@
       padding: 20px;
     }
     
-    .links {
+    .image-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    
+    .image-container:hover .image-nav {
       display: flex;
-      gap: 10px;
+    }
+    
+    .image-nav:hover {
+      background: rgba(0,0,0,0.8);
+    }
+    
+    .image-nav.prev {
+      left: 10px;
+    }
+    
+    .image-nav.next {
+      right: 10px;
+    }
+    
+    .image-counter {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: none;
+    }
+    
+    .image-container:hover .image-counter {
+      display: block;
+    }
+    }
+    
+    .links {
       margin-top: 10px;
     }
     
     .links a {
       flex: 1;
-      background: #74c69d;
-      color: #2c3e50;
-      padding: 8px;
       text-align: center;
-      text-decoration: none;
-      border-radius: 6px;
-      font-size: 0.85em;
     }
-    
-    .links a:hover { background: #52b788; }
     
     .back-btn {
       background: #34495e;
@@ -260,18 +295,9 @@
     }
     
     .notes-section button {
-      background: #74c69d;
-      color: #2c3e50;
-      border: none;
       padding: 8px 16px;
-      border-radius: 6px;
-      cursor: pointer;
       margin-top: 8px;
       font-size: 0.9em;
-    }
-    
-    .notes-section button:hover {
-      background: #52b788;
     }
     
     .notes-display {
@@ -374,21 +400,128 @@
       background: #6d7d8e;
     }
     
+    /* Image modal styles */
+    .image-modal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      cursor: pointer;
+    }
+    
+    .image-modal.active {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .image-modal-content {
+      max-width: 90%;
+      max-height: 90%;
+      position: relative;
+    }
+    
+    .image-modal-content img {
+      max-width: 100%;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 8px;
+    }
+    
+    .image-modal-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.9);
+      color: #2c3e50;
+      border: none;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+    
+    .image-modal-nav:hover {
+      background: white;
+    }
+    
+    .image-modal-nav.prev {
+      left: 20px;
+    }
+    
+    .image-modal-nav.next {
+      right: 20px;
+    }
+    
+    .image-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      z-index: 10;
+    }
+    
+    .image-modal-close:hover {
+      color: #74c69d;
+    }
+    
+    .image-modal-counter {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+    
+    .image-modal-title {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
     .order-links {
       display: flex;
       gap: 10px;
-      font-size: 0.5em;
     }
     
-    .order-links a {
+    .order-links a,
+    .order-links button {
       background: #74c69d;
       color: #2c3e50;
       padding: 8px 16px;
       text-decoration: none;
       border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin: 0;
     }
     
-    .order-links a:hover { background: #52b788; }
+    .order-links a:hover,
+    .order-links button:hover { background: #52b788; }
   </style>
 </head>
 <body>
@@ -421,6 +554,18 @@
         <button class="cancel-btn" onclick="closeNoteModal()">Cancel</button>
         <button onclick="saveNoteFromModal()">Save Note</button>
       </div>
+    </div>
+  </div>
+
+  <!-- Modal for viewing images -->
+  <div class="image-modal" id="image-modal" onclick="closeImageModal()">
+    <span class="image-modal-close">&times;</span>
+    <div class="image-modal-title" id="image-modal-title"></div>
+    <div class="image-modal-content" onclick="event.stopPropagation()">
+      <img id="image-modal-img" src="" alt="">
+      <button class="image-modal-nav prev" onclick="event.stopPropagation(); prevModalImage()">‹</button>
+      <button class="image-modal-nav next" onclick="event.stopPropagation(); nextModalImage()">›</button>
+      <div class="image-modal-counter" id="image-modal-counter"></div>
     </div>
   </div>
 
@@ -856,7 +1001,7 @@
           <a href="https://en.wikipedia.org/wiki/${order}" target="_blank">Wikipedia</a>
           <a href="https://genent.cals.ncsu.edu/insect-identification/order-${order.toLowerCase()}/" target="_blank">NC State</a>
           ${bugguideButton}
-          <button onclick="exportOrderPDF('${order}')" style="background: #74c69d; color: #2c3e50; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">📄 Export PDF</button>
+          <button onclick="exportOrderPDF('${order}')">📄 Export PDF</button>
         </div>
       `;
       
@@ -972,15 +1117,84 @@
     
     async function loadImage(insect, localPath) {
       const container = document.getElementById(`img-${insect.family}`);
+      const basePath = `images/${insect.order}/${insect.family}/`;
       
-      // Use shared image fetching function
-      const imgUrl = await fetchInsectImage(insect);
+      // Try to load multiple images (specimen.jpg, specimen1.jpg, specimen2.jpg, etc.)
+      const imageUrls = [];
       
-      if (imgUrl) {
-        container.innerHTML = `<img src="${imgUrl}" alt="${insect.name}">`;
+      // Try specimen.jpg first
+      const mainImg = await tryLoadImage(`${basePath}specimen.jpg`);
+      if (mainImg) imageUrls.push(mainImg);
+      
+      // Try numbered specimens (specimen1.jpg through specimen10.jpg)
+      for (let i = 1; i <= 10; i++) {
+        const numberedImg = await tryLoadImage(`${basePath}specimen${i}.jpg`);
+        if (numberedImg) {
+          imageUrls.push(numberedImg);
+        } else if (i > 1) {
+          break; // Stop if we hit a missing number
+        }
+      }
+      
+      // Always try to add Wikipedia image at the end
+      const wikiImg = await fetchInsectImage(insect);
+      if (wikiImg) imageUrls.push(wikiImg);
+      
+      // Display images with carousel if any found
+      if (imageUrls.length > 0) {
+        displayImageCarousel(container, imageUrls, insect.name);
       } else {
         container.innerHTML = `<div class="placeholder">No image available<br><small>Add to: ${localPath}</small></div>`;
       }
+    }
+    
+    async function tryLoadImage(path) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(path);
+        img.onerror = () => resolve(null);
+        img.src = path;
+      });
+    }
+    
+    function displayImageCarousel(container, imageUrls, altText) {
+      let currentIndex = 0;
+      
+      // Store images in container's dataset
+      container.imageUrls = imageUrls;
+      container.insectName = altText;
+      
+      function updateImage() {
+        const showNav = imageUrls.length > 1;
+        const navButtons = showNav ? `
+          <button class="image-nav prev" onclick="event.stopPropagation(); this.parentElement.previousImage()">‹</button>
+          <button class="image-nav next" onclick="event.stopPropagation(); this.parentElement.nextImage()">›</button>
+          <div class="image-counter">${currentIndex + 1} / ${imageUrls.length}</div>
+        ` : '';
+        
+        container.innerHTML = `
+          <img src="${imageUrls[currentIndex]}" alt="${altText}" style="cursor: pointer;">
+          ${navButtons}
+        `;
+        
+        // Add click handler to image
+        const img = container.querySelector('img');
+        img.onclick = () => {
+          openImageModal(container.imageUrls, currentIndex, container.insectName);
+        };
+      }
+      
+      container.previousImage = () => {
+        currentIndex = (currentIndex - 1 + imageUrls.length) % imageUrls.length;
+        updateImage();
+      };
+      
+      container.nextImage = () => {
+        currentIndex = (currentIndex + 1) % imageUrls.length;
+        updateImage();
+      };
+      
+      updateImage();
     }
 
     // Save order note
@@ -1008,6 +1222,52 @@
       document.getElementById('note-modal').classList.remove('active');
       currentEditFamily = null;
       currentEditFamilyName = null;
+    }
+    
+    // Image modal functions
+    let modalImages = [];
+    let modalCurrentIndex = 0;
+    let modalInsectName = '';
+    
+    function openImageModal(imageUrls, currentIndex, insectName) {
+      modalImages = imageUrls;
+      modalCurrentIndex = currentIndex;
+      modalInsectName = insectName;
+      updateModalImage();
+      document.getElementById('image-modal').classList.add('active');
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+    
+    function closeImageModal() {
+      document.getElementById('image-modal').classList.remove('active');
+      document.body.style.overflow = ''; // Restore scrolling
+    }
+    
+    function prevModalImage() {
+      modalCurrentIndex = (modalCurrentIndex - 1 + modalImages.length) % modalImages.length;
+      updateModalImage();
+    }
+    
+    function nextModalImage() {
+      modalCurrentIndex = (modalCurrentIndex + 1) % modalImages.length;
+      updateModalImage();
+    }
+    
+    function updateModalImage() {
+      document.getElementById('image-modal-img').src = modalImages[modalCurrentIndex];
+      document.getElementById('image-modal-title').textContent = modalInsectName;
+      document.getElementById('image-modal-counter').textContent = `${modalCurrentIndex + 1} / ${modalImages.length}`;
+      
+      // Hide nav buttons if only one image
+      const navButtons = document.querySelectorAll('.image-modal-nav');
+      const counter = document.getElementById('image-modal-counter');
+      if (modalImages.length <= 1) {
+        navButtons.forEach(btn => btn.style.display = 'none');
+        counter.style.display = 'none';
+      } else {
+        navButtons.forEach(btn => btn.style.display = 'flex');
+        counter.style.display = 'block';
+      }
     }
     
     function saveNoteFromModal() {

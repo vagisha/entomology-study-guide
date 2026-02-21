@@ -4,10 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Entomology Flashcards</title>
+  <link rel="stylesheet" href="shared.css">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, sans-serif; background: #2c3e50; color: #eee; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-    h1 { margin-bottom: 10px; color: #74c69d; }
+    /* Flashcard-specific styles */
+    body { display: flex; flex-direction: column; align-items: center; }
     .mode-toggle { margin-bottom: 20px; }
     .mode-toggle button { background: #333; color: #eee; }
     .mode-toggle button.active { background: #4ecca3; color: #1a1a2e; }
@@ -16,33 +16,17 @@
     .card.flipped .card-inner { transform: rotateY(180deg); }
     .card-front, .card-back { position: absolute; width: 100%; min-height: 600px; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
     .card-front { background: linear-gradient(135deg, #34495e 0%, #5d6d7e 100%); }
-    .card-back { background: linear-gradient(135deg, #52b788 0%, #74c69d 100%); transform: rotateY(180deg); color: #2c3e50; }
+    .card-back { background: linear-gradient(135deg, #4a5f5a 0%, #5d7570 100%); transform: rotateY(180deg); color: #f0f0f0; }
     .card-front.optional, .card-back.optional { border: 6px dashed #ffa500; }
     .insect-name { font-size: 1.6em; font-weight: bold; margin-bottom: 10px; }
     .answer-label { font-size: 0.9em; opacity: 0.8; margin-bottom: 5px; }
     .answer-value { font-size: 1.4em; font-weight: bold; margin-bottom: 15px; }
-    .marks { font-size: 1em; line-height: 1.5; }
-    .optional-badge {
-      display: inline-block;
-      background: #ffa500;
-      color: #2c3e50;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75em;
-      font-weight: bold;
-      margin-left: 8px;
-    }
-    .card-links { margin-top: 15px; display: flex; gap: 10px; justify-content: center; }
-    .card-links a { background: rgba(255,255,255,0.3); color: #2c3e50; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-size: 0.85em; }
-    .card-links a:hover { background: rgba(255,255,255,0.5); }
+    .marks { font-size: 1em; }
+    .card-links { margin-top: 15px; }
     .hint { font-size: 0.85em; opacity: 0.7; margin-top: 10px; }
-    .img-container { width: 100%; height: 280px; background: rgba(255,255,255,0.2); border-radius: 8px; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; font-size: 0.8em; overflow: hidden; }
-    .img-container img { width: 100%; height: 100%; object-fit: contain; }
-    button { background: #74c69d; color: #2c3e50; border: none; padding: 12px 24px; font-size: 1em; border-radius: 8px; cursor: pointer; margin: 5px; }
-    button:hover { background: #52b788; }
+    .img-container { height: 280px; font-size: 0.8em; }
     .controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
     .progress { margin-top: 15px; opacity: 0.7; }
-    .loading { opacity: 0.6; font-size: 0.9em; }
   </style>
 </head>
 <body>

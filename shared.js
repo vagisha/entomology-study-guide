@@ -39,7 +39,8 @@ async function fetchInsectImage(insect) {
         const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(insect.wiki)}`;
         const res = await fetch(url);
         const data = await res.json();
-        const imgUrl = data.thumbnail?.source || '';
+        // Try to get original image first, fallback to thumbnail
+        const imgUrl = data.originalimage?.source || data.thumbnail?.source || '';
         imageCache[insect.wiki] = imgUrl;
         resolve(imgUrl);
       } catch {
@@ -113,7 +114,7 @@ function getNcStateUrl(insect) {
   // Check if this is a single-family order (link to order level only)
   const singleFamilyOrders = ['Protura', 'Diplura', 'Archaeognatha', 'Zygentoma', 'Mantodea', 
                                'Embioptera', 'Dermaptera', 'Phasmatodea', 'Psocodea', 
-                               'Thysanoptera', 'Raphidioptera', 'Siphonaptera', 'Megaloptera'];
+                               'Thysanoptera', 'Raphidioptera', 'Siphonaptera', 'Megaloptera', 'Plecoptera'];
   
   if (singleFamilyOrders.includes(order)) {
     return `https://genent.cals.ncsu.edu/insect-identification/order-${orderLower}/`;
