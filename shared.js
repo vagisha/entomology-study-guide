@@ -59,6 +59,12 @@ function getNcStateUrl(insect) {
   const orderLower = order.toLowerCase();
   const familyLower = family.toLowerCase();
   
+  // Families with no NC State page
+  const noLinkFamilies = ['Cucujidae'];
+  if (noLinkFamilies.includes(family)) {
+    return null;
+  }
+  
   // Special cases for orders
   if (order === 'Protura' || order === 'Diplura') {
     return `https://genent.cals.ncsu.edu/insect-identification/class-${orderLower}/`;
@@ -70,6 +76,10 @@ function getNcStateUrl(insect) {
   
   if (order === 'Megaloptera') {
     return 'https://genent.cals.ncsu.edu/insect-identification/megaloptera/';
+  }
+  
+  if (order === 'Raphidioptera') {
+    return 'https://genent.cals.ncsu.edu/insect-identification/raphidioptera/';
   }
   
   if (order === 'Acari') {
