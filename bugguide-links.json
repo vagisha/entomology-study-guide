@@ -1,0 +1,18 @@
+{
+  "orders": {
+    "Coleoptera": "https://bugguide.net/node/view/60",
+    "Lepidoptera": "https://www.bugguide.net/node/view/57",
+    "Hymenoptera": "https://www.bugguide.net/node/view/59",
+    "Diptera": "https://bugguide.net/node/view/55",
+    "Hemiptera": "https://www.bugguide.net/node/view/63",
+    "Orthoptera": "https://www.bugguide.net/node/view/73",
+    "Odonata": "https://www.bugguide.net/node/view/77",
+    "Blattodea": "https://www.bugguide.net/node/view/342386"
+  },
+  "families": {
+    "Coccinellidae": "https://bugguide.net/node/view/179",
+    "Carabidae": "https://bugguide.net/node/view/186",
+    "Scarabaeidae": "https://bugguide.net/node/view/187",
+    "Buprestidae": "https://bugguide.net/node/view/162"
+  }
+}

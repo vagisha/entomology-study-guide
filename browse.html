@@ -726,24 +726,21 @@
     };
     
     // BugGuide links - edit this object to add more links
-    const bugguideLinks = {
-      orders: {
-        "Coleoptera": "https://bugguide.net/node/view/60",
-        "Lepidoptera": "https://bugguide.net/node/view/81",
-        "Hymenoptera": "https://bugguide.net/node/view/91",
-        "Diptera": "https://bugguide.net/node/view/55",
-        "Hemiptera": "https://bugguide.net/node/view/78",
-        "Orthoptera": "https://bugguide.net/node/view/70",
-        "Odonata": "https://bugguide.net/node/view/191",
-        "Blattodea": "https://www.bugguide.net/node/view/342386"
-      },
-      families: {
-        "Coccinellidae": "https://bugguide.net/node/view/179",
-        "Carabidae": "https://bugguide.net/node/view/186",
-        "Scarabaeidae": "https://bugguide.net/node/view/187",
-        "Buprestidae": "https://bugguide.net/node/view/162"
-      }
+    let bugguideLinks = {
+      orders: {},
+      families: {}
     };
+    
+    // Load BugGuide links from JSON file
+    async function loadBugGuideLinks() {
+      try {
+        const response = await fetch('bugguide-links.json');
+        bugguideLinks = await response.json();
+        console.log('Loaded BugGuide links');
+      } catch (error) {
+        console.warn('Could not load bugguide-links.json');
+      }
+    }
     
     let insectData = [];
 
@@ -752,6 +749,7 @@
       try {
         insectData = await loadInsectsData();
         await NotesManager.loadRepoNotes();
+        await loadBugGuideLinks();
         groupInsectsByOrder();
         showOrders();
       } catch (error) {
