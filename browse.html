@@ -1133,7 +1133,7 @@
       }
       
       // Always try to add Wikipedia image at the end
-      const wikiImg = await fetchInsectImage(insect);
+      const wikiImg = await fetchWikipediaImage(insect);
       if (wikiImg) imageUrls.push(wikiImg);
       
       // Display images with carousel if any found

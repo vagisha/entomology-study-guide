@@ -30,26 +30,31 @@ async function fetchInsectImage(insect) {
     
     localImg.onerror = async function() {
       // Local image not found, try Wikipedia
-      if (imageCache[insect.wiki]) {
-        resolve(imageCache[insect.wiki]);
-        return;
-      }
-      
-      try {
-        const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(insect.wiki)}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        // Try to get original image first, fallback to thumbnail
-        const imgUrl = data.originalimage?.source || data.thumbnail?.source || '';
-        imageCache[insect.wiki] = imgUrl;
-        resolve(imgUrl);
-      } catch {
-        resolve('');
-      }
+      const wikiImg = await fetchWikipediaImage(insect);
+      resolve(wikiImg);
     };
     
     localImg.src = localPath;
   });
+}
+
+// Fetch image from Wikipedia only (no local fallback)
+async function fetchWikipediaImage(insect) {
+  if (imageCache[insect.wiki]) {
+    return imageCache[insect.wiki];
+  }
+  
+  try {
+    const url = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(insect.wiki)}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    // Try to get original image first, fallback to thumbnail
+    const imgUrl = data.originalimage?.source || data.thumbnail?.source || '';
+    imageCache[insect.wiki] = imgUrl;
+    return imgUrl;
+  } catch {
+    return '';
+  }
 }
 
 // Generate NC State URL for an insect

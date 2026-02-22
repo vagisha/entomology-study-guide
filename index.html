@@ -341,8 +341,8 @@
         // Skip if order not selected
         if (selectedOrders.size > 0 && !selectedOrders.has(insect.order)) return;
         
-        // Add insect to deck without loading images yet
-        deck.push({ insect, imageUrls: null });
+        // Add insect to deck without loading images yet (will expand on first view)
+        deck.push({ insect, imageUrl: null, expanded: false });
       });
       shuffle(deck);
     }
@@ -405,8 +405,36 @@
     }
 
     async function showCard() {
+      // Check if we need to expand this card into multiple cards
       const item = deck[currentIndex];
-      const insect = item.insect;
+      
+      if (!item.expanded && !item.imageUrl) {
+        // This is an unexpanded card - load images and expand if needed
+        const images = await getAllInsectImages(item.insect);
+        
+        if (images.length > 1) {
+          // Multiple images - expand into separate cards
+          deck.splice(currentIndex, 1); // Remove the placeholder card
+          
+          // Insert a card for each image
+          images.forEach((imageUrl, idx) => {
+            deck.splice(currentIndex + idx, 0, {
+              insect: item.insect,
+              imageUrl: imageUrl,
+              expanded: true
+            });
+          });
+        } else {
+          // Single image - just mark as expanded
+          item.imageUrl = images[0] || null;
+          item.expanded = true;
+        }
+      }
+      
+      // Now display the card
+      const currentItem = deck[currentIndex];
+      const insect = currentItem.insect;
+      const imgUrl = currentItem.imageUrl;
 
       document.getElementById('front-img').innerHTML = '<span class="loading">Loading...</span>';
       document.getElementById('back-img').innerHTML = '';
@@ -441,16 +469,6 @@
       document.getElementById('progress').textContent = `Card ${currentIndex + 1} of ${deck.length}`;
       document.querySelector('.card').classList.remove('flipped');
 
-      // Load images lazily - only when card is shown
-      if (!item.imageUrls) {
-        item.imageUrls = await getAllInsectImages(insect);
-      }
-      
-      // Pick a random image from available images
-      const imgUrl = item.imageUrls.length > 0 
-        ? item.imageUrls[Math.floor(Math.random() * item.imageUrls.length)]
-        : null;
-      
       const imgHtml = imgUrl ? `<img src="${imgUrl}" alt="${insect.name}">` : 'No image';
       document.getElementById('front-img').innerHTML = imgHtml;
       document.getElementById('back-img').innerHTML = imgHtml;
@@ -470,14 +488,11 @@
         }
       }
       
-      // If local images found, return them
-      if (availableImages.length > 0) {
-        return availableImages;
-      }
+      // Always try to add Wikipedia image
+      const wikiImg = await fetchWikipediaImage(insect);
+      if (wikiImg) availableImages.push(wikiImg);
       
-      // Fall back to Wikipedia
-      const wikiImg = await fetchInsectImage(insect);
-      return wikiImg ? [wikiImg] : [];
+      return availableImages;
     }
     
     async function tryLoadImage(path) {
