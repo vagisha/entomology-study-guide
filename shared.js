@@ -18,7 +18,7 @@ async function loadInsectsData() {
 
 // Fetch image with local fallback to Wikipedia
 async function fetchInsectImage(insect) {
-  const localPath = `images/${insect.order}/${insect.family}/specimen.jpg`;
+  const localPath = `images/${insect.order}/${insect.family}/specimen1.jpg`;
   
   // Try local image first
   return new Promise((resolve) => {

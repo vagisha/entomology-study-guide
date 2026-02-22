@@ -21,6 +21,30 @@ Interactive flashcards and browse interface for studying insects for Science Oly
 └── README.md               # This file
 ```
 
+## Image Naming Convention
+
+Local specimen images should be placed in `images/[Order]/[Family]/` with the following naming:
+
+- **Required format**: `specimen1.jpg`, `specimen2.jpg`, `specimen3.jpg`, etc.
+- **Do NOT use**: `specimen.jpg` (without a number)
+
+**Important**: 
+- Always start with `specimen1.jpg` (not specimen.jpg)
+- Use sequential numbering with **no gaps** (specimen1, specimen2, specimen3...)
+- The system checks up to `specimen10.jpg`
+- If there's a gap (e.g., specimen1.jpg exists but specimen2.jpg doesn't), it will stop checking
+- Multiple images for a family will create separate flashcards for each image
+- If no local images exist, the system falls back to Wikipedia API
+
+**Examples**:
+```
+images/Coleoptera/Cerambycidae/specimen1.jpg
+images/Coleoptera/Cerambycidae/specimen2.jpg
+images/Coleoptera/Cerambycidae/specimen3.jpg
+```
+
+**Note**: You'll see 404 errors in the browser console when checking for non-existent images. This is normal and doesn't affect functionality.
+
 ## Data Structure
 
 The `insects-data.json` file contains 123 families from 26 orders, including:

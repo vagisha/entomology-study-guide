@@ -36,10 +36,21 @@
   </div>
   
   <div style="text-align: center; margin-bottom: 15px;">
-    <label style="color: #eee; cursor: pointer;">
-      <input type="checkbox" id="include-optional" checked onchange="toggleOptional()">
+    <label style="color: #eee; cursor: pointer; margin-right: 20px;">
+      <input type="checkbox" id="include-optional" onchange="toggleOptional()">
       Include State/National Level (Optional)
     </label>
+    <button onclick="toggleOrderFilter()" style="padding: 8px 16px;">Filter by Order</button>
+  </div>
+  
+  <div id="order-filter" style="display: none; text-align: center; margin-bottom: 15px; background: #34495e; padding: 15px; border-radius: 8px; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <div style="margin-bottom: 10px; color: #74c69d; font-weight: bold;">Select Orders to Include:</div>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;" id="order-checkboxes"></div>
+    <div style="margin-top: 10px;">
+      <button onclick="selectAllOrders()" style="padding: 6px 12px; font-size: 0.9em;">Select All</button>
+      <button onclick="deselectAllOrders()" style="padding: 6px 12px; font-size: 0.9em;">Deselect All</button>
+      <button onclick="applyOrderFilter()" style="padding: 6px 12px; font-size: 0.9em; background: #52b788;">Apply Filter</button>
+    </div>
   </div>
   
   <div class="card" onclick="flipCard()">
@@ -74,6 +85,7 @@
     async function initFlashcards() {
       try {
         insects = await loadInsectsData();
+        initializeOrderFilter();
         buildDeck();
         showCard();
       } catch (error) {
@@ -326,7 +338,11 @@
         // Skip optional insects if checkbox is unchecked
         if (insect.optional && !includeOptional) return;
         
-        deck.push({ insect });
+        // Skip if order not selected
+        if (selectedOrders.size > 0 && !selectedOrders.has(insect.order)) return;
+        
+        // Add insect to deck without loading images yet
+        deck.push({ insect, imageUrls: null });
       });
       shuffle(deck);
     }
@@ -335,6 +351,57 @@
       buildDeck();
       currentIndex = 0;
       showCard();
+    }
+    
+    // Order filter functions
+    let selectedOrders = new Set();
+    
+    function initializeOrderFilter() {
+      // Get unique orders
+      const orders = [...new Set(insects.map(i => i.order))].sort();
+      
+      const container = document.getElementById('order-checkboxes');
+      container.innerHTML = orders.map(order => `
+        <label style="color: #eee; cursor: pointer; background: #2c3e50; padding: 5px 10px; border-radius: 4px; font-size: 0.9em;">
+          <input type="checkbox" value="${order}" checked onchange="updateSelectedOrders()">
+          ${order}
+        </label>
+      `).join('');
+      
+      // Initialize with all orders selected
+      selectedOrders = new Set(orders);
+    }
+    
+    function toggleOrderFilter() {
+      const filter = document.getElementById('order-filter');
+      filter.style.display = filter.style.display === 'none' ? 'block' : 'none';
+    }
+    
+    function updateSelectedOrders() {
+      const checkboxes = document.querySelectorAll('#order-checkboxes input[type="checkbox"]');
+      selectedOrders.clear();
+      checkboxes.forEach(cb => {
+        if (cb.checked) selectedOrders.add(cb.value);
+      });
+    }
+    
+    function selectAllOrders() {
+      const checkboxes = document.querySelectorAll('#order-checkboxes input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.checked = true);
+      updateSelectedOrders();
+    }
+    
+    function deselectAllOrders() {
+      const checkboxes = document.querySelectorAll('#order-checkboxes input[type="checkbox"]');
+      checkboxes.forEach(cb => cb.checked = false);
+      updateSelectedOrders();
+    }
+    
+    function applyOrderFilter() {
+      buildDeck();
+      currentIndex = 0;
+      showCard();
+      toggleOrderFilter();
     }
 
     async function showCard() {
@@ -374,10 +441,52 @@
       document.getElementById('progress').textContent = `Card ${currentIndex + 1} of ${deck.length}`;
       document.querySelector('.card').classList.remove('flipped');
 
-      const imgUrl = await fetchInsectImage(insect);
+      // Load images lazily - only when card is shown
+      if (!item.imageUrls) {
+        item.imageUrls = await getAllInsectImages(insect);
+      }
+      
+      // Pick a random image from available images
+      const imgUrl = item.imageUrls.length > 0 
+        ? item.imageUrls[Math.floor(Math.random() * item.imageUrls.length)]
+        : null;
+      
       const imgHtml = imgUrl ? `<img src="${imgUrl}" alt="${insect.name}">` : 'No image';
       document.getElementById('front-img').innerHTML = imgHtml;
       document.getElementById('back-img').innerHTML = imgHtml;
+    }
+    
+    async function getAllInsectImages(insect) {
+      const basePath = `images/${insect.order}/${insect.family}/`;
+      const availableImages = [];
+      
+      // Try numbered specimens (specimen1.jpg through specimen10.jpg)
+      for (let i = 1; i <= 10; i++) {
+        const numberedImg = await tryLoadImage(`${basePath}specimen${i}.jpg`);
+        if (numberedImg) {
+          availableImages.push(numberedImg);
+        } else {
+          break; // Stop if we hit a missing number
+        }
+      }
+      
+      // If local images found, return them
+      if (availableImages.length > 0) {
+        return availableImages;
+      }
+      
+      // Fall back to Wikipedia
+      const wikiImg = await fetchInsectImage(insect);
+      return wikiImg ? [wikiImg] : [];
+    }
+    
+    async function tryLoadImage(path) {
+      try {
+        const response = await fetch(path, { method: 'HEAD' });
+        return response.ok ? path : null;
+      } catch (error) {
+        return null;
+      }
     }
 
     function nextCard() { currentIndex = (currentIndex + 1) % deck.length; showCard(); }

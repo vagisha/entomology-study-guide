@@ -1071,7 +1071,7 @@
         const card = document.createElement('div');
         card.className = 'family-card' + (insect.optional ? ' optional' : '');
         
-        const imagePath = `images/${insect.order}/${insect.family}/specimen.jpg`;
+        const imagePath = `images/${insect.order}/${insect.family}/specimen1.jpg`;
         
         // Check if BugGuide link exists for this specific family only (no fallback to order)
         const familyLink = bugguideLinks.families?.[insect.family];
@@ -1119,19 +1119,15 @@
       const container = document.getElementById(`img-${insect.family}`);
       const basePath = `images/${insect.order}/${insect.family}/`;
       
-      // Try to load multiple images (specimen.jpg, specimen1.jpg, specimen2.jpg, etc.)
+      // Try to load multiple images (specimen1.jpg, specimen2.jpg, etc.)
       const imageUrls = [];
-      
-      // Try specimen.jpg first
-      const mainImg = await tryLoadImage(`${basePath}specimen.jpg`);
-      if (mainImg) imageUrls.push(mainImg);
       
       // Try numbered specimens (specimen1.jpg through specimen10.jpg)
       for (let i = 1; i <= 10; i++) {
         const numberedImg = await tryLoadImage(`${basePath}specimen${i}.jpg`);
         if (numberedImg) {
           imageUrls.push(numberedImg);
-        } else if (i > 1) {
+        } else {
           break; // Stop if we hit a missing number
         }
       }
