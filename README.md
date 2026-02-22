@@ -5,9 +5,18 @@ Interactive flashcards and browse interface for studying insects for Science Oly
 ## Features
 
 - **Flashcards** (`index.html`): Interactive flashcards with images, distinguishing marks, and optional family filtering
+  - Multi-select order filter to focus on specific insect orders
+  - Multiple images per family create separate flashcards (local + Wikipedia)
+  - Random image selection for variety
+  - Lazy loading for fast initial page load
 - **Browse** (`browse.html`): Browse insects by order with notes, PDF export, and detailed information
+  - Image carousel for families with multiple specimens
+  - Full-screen image modal viewer
+  - Collaborative notes system (repository + localStorage)
+  - Export notes to share with others
 - **Shared Data**: All insect metadata stored in `insects-data.json` for easy maintenance
 - **Shared Code**: Common functionality in `shared.js` (data loading, image fetching, URL generation)
+- **Shared Styles**: Common CSS in `shared.css` for consistent design
 
 ## File Structure
 
@@ -15,9 +24,11 @@ Interactive flashcards and browse interface for studying insects for Science Oly
 ├── index.html              # Flashcard interface
 ├── browse.html             # Browse interface
 ├── insects-data.json       # Insect metadata (123 families, 27 optional)
+├── insects-notes.json      # Shared notes (exported by users, loaded on page load)
 ├── shared.js               # Shared JavaScript functions
 ├── shared.css              # Shared CSS styles
-├── images/                 # Local specimen images (Order/Family/specimen.jpg)
+├── bugguide-links.json     # BugGuide URL mappings
+├── images/                 # Local specimen images (Order/Family/specimen1.jpg, specimen2.jpg, etc.)
 └── README.md               # This file
 ```
 
@@ -82,9 +93,19 @@ Then open `http://localhost:8000/index.html` or `http://localhost:8000/browse.ht
 ## Notes
 
 - Notes are stored in browser localStorage
+- Repository notes are loaded from `insects-notes.json` on page load
+- User edits in localStorage take precedence over repository notes
 - Export/import notes as JSON
 - PDF export excludes optional families
 - Images loaded from local `images/` folder or Wikipedia API fallback
+
+### Sharing Notes with Others
+
+1. Add your notes in the browse view
+2. Click "💾 Export Notes" to download `insects-notes.json`
+3. Replace the `insects-notes.json` file in the repository with your exported file
+4. Commit and push to share with other users
+5. Other users will see your notes when they load the page (their localStorage edits will override)
 
 ## Shared Functions (shared.js)
 

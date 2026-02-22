@@ -571,17 +571,38 @@
 
   <script src="shared.js"></script>
   <script>
-    // Notes management using localStorage
+    // Notes management - loads from insects-notes.json and merges with localStorage
     const NotesManager = {
-      getOrderNote: function(order) {
-        return localStorage.getItem(`note-order-${order}`) || '';
+      repoNotes: { orderNotes: {}, familyNotes: {} },
+      
+      async loadRepoNotes() {
+        try {
+          const response = await fetch('insects-notes.json');
+          this.repoNotes = await response.json();
+          console.log('Loaded repository notes');
+        } catch (error) {
+          console.warn('Could not load insects-notes.json, using localStorage only');
+        }
       },
+      
+      getOrderNote: function(order) {
+        // localStorage takes precedence over repo notes
+        const localNote = localStorage.getItem(`note-order-${order}`);
+        if (localNote) return localNote;
+        return this.repoNotes.orderNotes?.[order] || '';
+      },
+      
       setOrderNote: function(order, note) {
         localStorage.setItem(`note-order-${order}`, note);
       },
+      
       getFamilyNote: function(family) {
-        return localStorage.getItem(`note-family-${family}`) || '';
+        // localStorage takes precedence over repo notes
+        const localNote = localStorage.getItem(`note-family-${family}`);
+        if (localNote) return localNote;
+        return this.repoNotes.familyNotes?.[family] || '';
       },
+      
       setFamilyNote: function(family, note) {
         localStorage.setItem(`note-family-${family}`, note);
       }
@@ -730,6 +751,7 @@
     async function initBrowse() {
       try {
         insectData = await loadInsectsData();
+        await NotesManager.loadRepoNotes();
         groupInsectsByOrder();
         showOrders();
       } catch (error) {
@@ -1330,13 +1352,13 @@
       const url = URL.createObjectURL(dataBlob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `entomology-notes-${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `insects-notes.json`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
-      alert(`Exported ${Object.keys(notes.orderNotes).length} order notes and ${Object.keys(notes.familyNotes).length} family notes!`);
+      alert(`Exported ${Object.keys(notes.orderNotes).length} order notes and ${Object.keys(notes.familyNotes).length} family notes!\n\nTo share with others: Replace insects-notes.json in the repository with this exported file.`);
     }
     
     // Import notes from JSON file (merge with existing)
