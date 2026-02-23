@@ -1003,6 +1003,9 @@
     }
 
     function showFamilies(order) {
+      // Scroll to top of page
+      window.scrollTo(0, 0);
+      
       document.getElementById('order-list').style.display = 'none';
       document.getElementById('family-grid').classList.add('active');
       document.getElementById('back-btn').classList.add('active');
@@ -1444,19 +1447,50 @@
       let yPos = margin;
       
       // Title
-      doc.setFontSize(20);
+      doc.setFontSize(24);
       doc.setTextColor(64, 145, 108);
       doc.text(String(order), margin, yPos);
-      yPos += 10;
+      yPos += 12;
       
       // Order info
       const info = orderInfo[order];
       if (info) {
-        doc.setFontSize(10);
+        doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
+        
+        // Common Name
         const commonName = String(info.commonName || 'N/A').replace(/[^\x00-\x7F]/g, '');
-        doc.text('Common Name: ' + commonName, margin, yPos);
-        yPos += 6;
+        const commonNameLines = doc.splitTextToSize('Common Name: ' + commonName, contentWidth);
+        doc.text(commonNameLines, margin, yPos);
+        yPos += (commonNameLines.length * 6) + 2;
+        
+        // Meaning
+        if (info.meaning) {
+          const meaningLines = doc.splitTextToSize('Meaning: ' + String(info.meaning).replace(/[^\x00-\x7F]/g, ''), contentWidth);
+          doc.text(meaningLines, margin, yPos);
+          yPos += (meaningLines.length * 6) + 2;
+        }
+        
+        // Characteristics
+        if (info.characteristics) {
+          const charLines = doc.splitTextToSize('Characteristics: ' + String(info.characteristics).replace(/[^\x00-\x7F]/g, ''), contentWidth);
+          doc.text(charLines, margin, yPos);
+          yPos += (charLines.length * 6) + 2;
+        }
+        
+        // Wings
+        if (info.wings) {
+          const wingsLines = doc.splitTextToSize('Wings: ' + String(info.wings).replace(/[^\x00-\x7F]/g, ''), contentWidth);
+          doc.text(wingsLines, margin, yPos);
+          yPos += (wingsLines.length * 6) + 2;
+        }
+        
+        // Children/Immature forms
+        if (info.children) {
+          const childrenLines = doc.splitTextToSize('Immature Forms: ' + String(info.children).replace(/[^\x00-\x7F]/g, ''), contentWidth);
+          doc.text(childrenLines, margin, yPos);
+          yPos += (childrenLines.length * 6) + 2;
+        }
         
         // Get metamorphosis type
         let metamorphosisType = '';
@@ -1468,30 +1502,41 @@
             break;
           }
         }
-        doc.text('Metamorphosis: ' + metamorphosisType, margin, yPos);
-        yPos += 10;
+        if (metamorphosisType) {
+          const metaLines = doc.splitTextToSize('Metamorphosis: ' + metamorphosisType, contentWidth);
+          doc.text(metaLines, margin, yPos);
+          yPos += (metaLines.length * 6) + 2;
+        }
+        
+        yPos += 6; // Extra space before notes
       }
       
       // Order notes
       const orderNote = NotesManager.getOrderNote(order);
       if (orderNote) {
-        doc.setFontSize(12);
+        doc.setFontSize(14);
         doc.setTextColor(64, 145, 108);
-        doc.text('Order Notes:', margin, yPos);
-        yPos += 6;
-        doc.setFontSize(9);
+        doc.text('Notes:', margin, yPos);
+        yPos += 8;
+        doc.setFontSize(11);
         doc.setTextColor(0, 0, 0);
         const cleanNote = String(orderNote).replace(/[^\x00-\x7F]/g, '');
         const noteLines = doc.splitTextToSize(cleanNote, contentWidth);
         doc.text(noteLines, margin, yPos);
-        yPos += (noteLines.length * 5) + 5;
+        yPos += (noteLines.length * 6) + 6;
       }
-      
-      // Add new page for the family grid to avoid overlap
-      doc.addPage();
       
       // Get families for this order (exclude optional ones)
       const families = orderGroups[order].filter(insect => !insect.optional);
+      
+      // If 2 or fewer families, keep on same page; otherwise start new page
+      let startYPos = margin; // Default for new page
+      if (families.length > 2) {
+        doc.addPage();
+      } else {
+        yPos += 10; // Add some spacing before families
+        startYPos = yPos; // Start families below order info
+      }
       
       // Layout in 2x2 grid (4 families per page)
       const cellWidth = (contentWidth - 10) / 2; // 10 for gap between columns
@@ -1509,10 +1554,11 @@
         // Add new page after every 4 families (but not on the first iteration)
         if (i > 0 && i % 4 === 0) {
           doc.addPage();
+          startYPos = margin; // Reset to top of new page
         }
         
         const cellX = margin + (col * (cellWidth + gapX));
-        const cellY = (i % 4 < 2) ? margin : margin + cellHeight + gapY;
+        const cellY = startYPos + (row * (cellHeight + gapY));
         
         // Draw cell border
         doc.setDrawColor(200, 200, 200);
@@ -1521,19 +1567,19 @@
         let cellYPos = cellY + 8;
         
         // Family name
-        doc.setFontSize(11);
+        doc.setFontSize(13);
         doc.setTextColor(64, 145, 108);
         const familyName = String(insect.family);
         doc.text(familyName, cellX + 5, cellYPos);
-        cellYPos += 6;
+        cellYPos += 7;
         
         // Common name (larger font)
-        doc.setFontSize(10);
+        doc.setFontSize(12);
         doc.setTextColor(0, 0, 0);
         const commonName = String(insect.name).replace(/[^\x00-\x7F]/g, '');
         const nameLines = doc.splitTextToSize(commonName, cellWidth - 10);
         doc.text(nameLines, cellX + 5, cellYPos);
-        cellYPos += (nameLines.length * 5) + 3;
+        cellYPos += (nameLines.length * 6) + 3;
         
         // Try to load and add image
         try {
@@ -1564,11 +1610,21 @@
               }
               
               doc.addImage(imgData, 'JPEG', cellX + 5, cellYPos, imgWidth, imgHeight);
-              cellYPos += imgHeight + 3;
+              cellYPos += imgHeight + 8;
             }
           }
         } catch (error) {
           console.log('Could not add image for ' + insect.family);
+        }
+        
+        // Add distinguishing marks metadata
+        if (insect.marks) {
+          doc.setFontSize(8);
+          doc.setTextColor(80, 80, 80);
+          const marksText = String(insect.marks).replace(/[^\x00-\x7F]/g, '');
+          const marksLines = doc.splitTextToSize(marksText, cellWidth - 10);
+          doc.text(marksLines, cellX + 5, cellYPos);
+          cellYPos += (marksLines.length * 4) + 4;
         }
         
         // Family notes (if any)
@@ -1601,15 +1657,6 @@
             // Notes fit in current cell
             doc.text(noteLines, cellX + 5, cellYPos);
           }
-        } else {
-          // Add "Notes:" label with space for handwritten notes (larger font)
-          doc.setFontSize(9);
-          doc.setTextColor(150, 150, 150);
-          doc.text('Notes: ___________________________', cellX + 5, cellYPos);
-          cellYPos += 6;
-          doc.text('_____________________________________', cellX + 5, cellYPos);
-          cellYPos += 6;
-          doc.text('_____________________________________', cellX + 5, cellYPos);
         }
       }
       
