@@ -530,6 +530,7 @@
     <div class="nav-links">
       <a href="index.html">Flashcards</a>
       <a href="browse.html">Browse Insects</a>
+      <a href="#" onclick="exportAllOrdersPDF(event); return false;">📄 Export Full PDF</a>
       <a href="#" onclick="exportNotes(); return false;">💾 Export Notes</a>
       <a href="#" onclick="document.getElementById('import-file').click(); return false;">📥 Import Notes</a>
       <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importNotes(event)">
@@ -1662,6 +1663,277 @@
       
       // Save PDF
       doc.save(order + '-study-guide.pdf');
+    }
+    
+    // Export all orders to a single PDF
+    async function exportAllOrdersPDF(event) {
+      // Show loading overlay
+      const loadingDiv = document.createElement('div');
+      loadingDiv.id = 'pdf-loading';
+      loadingDiv.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 10000; color: white; font-size: 24px; flex-direction: column;';
+      loadingDiv.innerHTML = '<div>⏳ Generating PDF...</div><div style="font-size: 14px; margin-top: 10px;">Please wait, this may take a moment</div>';
+      document.body.appendChild(loadingDiv);
+      
+      // Small delay to show loading message
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Get all orders (excluding those with only optional families)
+      const ordersToExport = Object.keys(orderGroups).filter(order => {
+        const nonOptionalFamilies = orderGroups[order].filter(insect => !insect.optional);
+        return nonOptionalFamilies.length > 0;
+      });
+      
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      let isFirstOrder = true;
+      
+      for (const order of ordersToExport) {
+        // Add page break between orders (except for first order)
+        if (!isFirstOrder) {
+          doc.addPage();
+        }
+        isFirstOrder = false;
+        
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 15;
+        const contentWidth = pageWidth - (2 * margin);
+        
+        let yPos = margin;
+        
+        // Title
+        doc.setFontSize(24);
+        doc.setTextColor(64, 145, 108);
+        doc.text(String(order), margin, yPos);
+        yPos += 12;
+        
+        // Order info
+        const info = orderInfo[order];
+        if (info) {
+          doc.setFontSize(12);
+          doc.setTextColor(0, 0, 0);
+          
+          // Common Name
+          const commonName = String(info.commonName || 'N/A').replace(/[^\x00-\x7F]/g, '');
+          const commonNameLines = doc.splitTextToSize('Common Name: ' + commonName, contentWidth);
+          doc.text(commonNameLines, margin, yPos);
+          yPos += (commonNameLines.length * 6) + 2;
+          
+          // Meaning
+          if (info.meaning) {
+            const meaningLines = doc.splitTextToSize('Meaning: ' + String(info.meaning).replace(/[^\x00-\x7F]/g, ''), contentWidth);
+            doc.text(meaningLines, margin, yPos);
+            yPos += (meaningLines.length * 6) + 2;
+          }
+          
+          // Characteristics
+          if (info.characteristics) {
+            const charLines = doc.splitTextToSize('Characteristics: ' + String(info.characteristics).replace(/[^\x00-\x7F]/g, ''), contentWidth);
+            doc.text(charLines, margin, yPos);
+            yPos += (charLines.length * 6) + 2;
+          }
+          
+          // Wings
+          if (info.wings) {
+            const wingsLines = doc.splitTextToSize('Wings: ' + String(info.wings).replace(/[^\x00-\x7F]/g, ''), contentWidth);
+            doc.text(wingsLines, margin, yPos);
+            yPos += (wingsLines.length * 6) + 2;
+          }
+          
+          // Children/Immature forms
+          if (info.children) {
+            const childrenLines = doc.splitTextToSize('Immature Forms: ' + String(info.children).replace(/[^\x00-\x7F]/g, ''), contentWidth);
+            doc.text(childrenLines, margin, yPos);
+            yPos += (childrenLines.length * 6) + 2;
+          }
+          
+          // Get metamorphosis type
+          let metamorphosisType = '';
+          for (const [type, data] of Object.entries(metamorphosisTypes)) {
+            if (data.orders.includes(order)) {
+              if (type === 'ametabolous') metamorphosisType = 'Ametabolous';
+              else if (type === 'hemimetabolous') metamorphosisType = 'Hemimetabolous';
+              else if (type === 'holometabolous') metamorphosisType = 'Holometabolous';
+              break;
+            }
+          }
+          if (metamorphosisType) {
+            const metaLines = doc.splitTextToSize('Metamorphosis: ' + metamorphosisType, contentWidth);
+            doc.text(metaLines, margin, yPos);
+            yPos += (metaLines.length * 6) + 2;
+          }
+          
+          yPos += 6;
+        }
+        
+        // Order notes
+        const orderNote = NotesManager.getOrderNote(order);
+        if (orderNote) {
+          doc.setFontSize(14);
+          doc.setTextColor(64, 145, 108);
+          doc.text('Notes:', margin, yPos);
+          yPos += 8;
+          doc.setFontSize(11);
+          doc.setTextColor(0, 0, 0);
+          const cleanNote = String(orderNote).replace(/[^\x00-\x7F]/g, '');
+          const noteLines = doc.splitTextToSize(cleanNote, contentWidth);
+          doc.text(noteLines, margin, yPos);
+          yPos += (noteLines.length * 6) + 6;
+        }
+        
+        // Get families for this order (exclude optional ones)
+        const families = orderGroups[order].filter(insect => !insect.optional);
+        
+        // If 2 or fewer families, keep on same page; otherwise start new page
+        let startYPos = margin;
+        if (families.length > 2) {
+          doc.addPage();
+        } else {
+          yPos += 10;
+          startYPos = yPos;
+        }
+        
+        // Layout in 2x2 grid
+        const cellWidth = (contentWidth - 10) / 2;
+        const cellHeight = 120;
+        const gapX = 10;
+        const gapY = 10;
+        
+        for (let i = 0; i < families.length; i++) {
+          const insect = families[i];
+          
+          const row = Math.floor((i % 4) / 2);
+          const col = (i % 4) % 2;
+          
+          if (i > 0 && i % 4 === 0) {
+            doc.addPage();
+            startYPos = margin;
+          }
+          
+          const cellX = margin + (col * (cellWidth + gapX));
+          const cellY = startYPos + (row * (cellHeight + gapY));
+          
+          doc.setDrawColor(200, 200, 200);
+          doc.rect(cellX, cellY, cellWidth, cellHeight);
+          
+          let cellYPos = cellY + 8;
+          
+          // Family name
+          doc.setFontSize(13);
+          doc.setTextColor(64, 145, 108);
+          const familyName = String(insect.family);
+          doc.text(familyName, cellX + 5, cellYPos);
+          cellYPos += 7;
+          
+          // Common name
+          doc.setFontSize(12);
+          doc.setTextColor(0, 0, 0);
+          const commonName = String(insect.name).replace(/[^\x00-\x7F]/g, '');
+          const nameLines = doc.splitTextToSize(commonName, cellWidth - 10);
+          doc.text(nameLines, cellX + 5, cellYPos);
+          cellYPos += (nameLines.length * 6) + 3;
+          
+          // Try to load and add image
+          try {
+            // Get first available image directly without DOM
+            const basePath = `images/${insect.order}/${insect.family}/`;
+            let imgUrl = null;
+            
+            // Try local images first
+            for (let i = 1; i <= 10; i++) {
+              const testUrl = `${basePath}specimen${i}.jpg`;
+              const exists = await tryLoadImage(testUrl);
+              if (exists) {
+                imgUrl = testUrl;
+                break;
+              }
+            }
+            
+            // Fall back to Wikipedia if no local image
+            if (!imgUrl) {
+              imgUrl = await fetchWikipediaImage(insect);
+            }
+            
+            if (imgUrl) {
+              const imgData = await getImageDataURL(imgUrl);
+              console.log('Image data for', insect.family, ':', !!imgData);
+              if (imgData) {
+                const maxImgWidth = cellWidth - 10;
+                const maxImgHeight = 35;
+                
+                const img = new Image();
+                img.src = imgUrl;
+                await new Promise(resolve => {
+                  img.onload = resolve;
+                  img.onerror = resolve;
+                });
+                
+                const aspectRatio = img.width / img.height;
+                let imgWidth = maxImgWidth;
+                let imgHeight = imgWidth / aspectRatio;
+                
+                if (imgHeight > maxImgHeight) {
+                  imgHeight = maxImgHeight;
+                  imgWidth = imgHeight * aspectRatio;
+                }
+                
+                doc.addImage(imgData, 'JPEG', cellX + 5, cellYPos, imgWidth, imgHeight);
+                cellYPos += imgHeight + 8;
+                console.log('Added image for', insect.family);
+              }
+            }
+          } catch (error) {
+            console.log('Could not add image for ' + insect.family, error);
+          }
+          
+          // Add distinguishing marks metadata
+          if (insect.marks) {
+            doc.setFontSize(8);
+            doc.setTextColor(80, 80, 80);
+            const marksText = String(insect.marks).replace(/[^\x00-\x7F]/g, '');
+            const marksLines = doc.splitTextToSize(marksText, cellWidth - 10);
+            doc.text(marksLines, cellX + 5, cellYPos);
+            cellYPos += (marksLines.length * 4) + 4;
+          }
+          
+          // Family notes
+          const familyNote = NotesManager.getFamilyNote(insect.family);
+          if (familyNote) {
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            const cleanNote = String(familyNote).replace(/[^\x00-\x7F]/g, '');
+            const noteLines = doc.splitTextToSize(cleanNote, cellWidth - 10);
+            
+            const notesHeight = noteLines.length * 4;
+            const remainingSpace = cellHeight - (cellYPos - cellY);
+            
+            if (notesHeight > remainingSpace) {
+              doc.addPage();
+              let newYPos = margin;
+              
+              doc.setFontSize(11);
+              doc.setTextColor(64, 145, 108);
+              doc.text(familyName + ' (continued)', margin, newYPos);
+              newYPos += 8;
+              
+              doc.setFontSize(9);
+              doc.setTextColor(100, 100, 100);
+              doc.text(noteLines, margin, newYPos);
+            } else {
+              doc.text(noteLines, cellX + 5, cellYPos);
+            }
+          }
+        }
+      }
+      
+      // Save PDF
+      doc.save('entomology-study-guide-complete.pdf');
+      
+      // Remove loading overlay
+      document.body.removeChild(loadingDiv);
+      
+      alert('Full PDF exported with ' + ordersToExport.length + ' orders!');
     }
     
     // Helper function to convert image to data URL
